@@ -46,40 +46,41 @@ def process_details(input_file="steam_games.csv", output_file="steam_details.csv
         print("Début de la récupération des détails...")
         
         for count, row in enumerate(reader):
-            appid = row['appid']
-            
-            # On saute si déjà traité
-            if appid in existing_ids:
-                continue
+            if count > 394:
+                appid = row['appid']
+                
+                # On saute si déjà traité
+                if appid in existing_ids:
+                    continue
 
-            print(f"[{count}] Récupération de : {row['name']} (ID: {appid})...")
-            
-            details = get_game_details(appid)
-            
-            if details:
-                # Extraction propre des données
-                price = details.get('price_overview', {}).get('final_formatted', 'N/A')
-                if details.get('is_free'): price = "Gratuit"
+                print(f"[{count}] Récupération de : {row['name']} (ID: {appid})...")
                 
-                genres = ", ".join([g['description'] for g in details.get('genres', [])])
-                devs = ", ".join(details.get('developers', []))
+                details = get_game_details(appid)
                 
-                writer.writerow({
-                    'appid': appid,
-                    'name': details.get('name'),
-                    'type': details.get('type'),
-                    'is_free': details.get('is_free'),
-                    'price': price,
-                    'genres': genres,
-                    'developers': devs
-                })
-                
-                # PAUSE CRITIQUE : Steam autorise environ 1 requête par seconde
-                # Plus tu es lent, moins tu as de chances d'être banni.
-                time.sleep(0.2) 
-            else:
-                # Petite pause même si échec
-                time.sleep(0.5)
+                if details:
+                    # Extraction propre des données
+                    price = details.get('price_overview', {}).get('final_formatted', 'N/A')
+                    if details.get('is_free'): price = "Gratuit"
+                    
+                    genres = ", ".join([g['description'] for g in details.get('genres', [])])
+                    devs = ", ".join(details.get('developers', []))
+                    
+                    writer.writerow({
+                        'appid': appid,
+                        'name': details.get('name'),
+                        'type': details.get('type'),
+                        'is_free': details.get('is_free'),
+                        'price': price,
+                        'genres': genres,
+                        'developers': devs
+                    })
+                    
+                    # PAUSE CRITIQUE : Steam autorise environ 1 requête par seconde
+                    # Plus tu es lent, moins tu as de chances d'être banni.
+                    time.sleep(0.2) 
+                else:
+                    # Petite pause même si échec
+                    time.sleep(0.5)
 
 # Lancer le processus
 process_details()

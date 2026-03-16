@@ -170,8 +170,6 @@ function DiscordMessage({ user, time, text, avatar }) {
 
 function App() {
 
-  const [isExpanded, setIsExpanded] = useState(false);
-
   const friends = [
     { id: 1, name: "Nelly", status: "online", avatar: logo },
     { id: 2, name: "User123", status: "offline", avatar: logo },
@@ -188,11 +186,6 @@ function App() {
     { id: 2, name: "Gaming Zone", icon: "GZ" },
     { id: 3, name: "Study Group", icon: "SG" },
   ];
-
-  // Sort friends: Online first
-  const sortedFriends = [...friends].sort((a, b) => 
-    a.status === 'online' ? -1 : 1
-  );
 
   const [channels] = useState(["general", "dev-log", "voice-chat"]);
   const [suggestedGames] = useState([
