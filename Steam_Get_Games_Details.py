@@ -74,7 +74,28 @@ def get_details_from_existing_csv(input_file="steam_games.csv", output_file="ste
 
     print(f"\nTerminé ! Les détails sont dans {output_file}")
 
+def cleanup_data(input_file="steamspy_details.csv", output_file="steamspy_details_cleaned.csv"):
+    fieldnames = [
+        'appid', 'name', 'developer', 'publisher', 'score_rank', 
+        'positive', 'negative', 'userscore', 'owners', 
+        'average_forever', 'median_forever', 'price', 'initialprice', 'discount', 'genre'
+    ]
+    with open(input_file, mode='r', encoding='utf-8') as f_in, \
+         open(output_file, mode='a', newline='', encoding='utf-8') as f_out:
+        
+        reader = csv.DictReader(f_in)
+        writer = csv.DictWriter(f_out, fieldnames=fieldnames)
+        
+        # Si le fichier est nouveau, on écrit l'en-tête
+        if os.stat(output_file).st_size == 0:
+            writer.writeheader()
+        
+        for row in reader:
+            if row["name"] == "":
+                continue
+            else:
+                writer.writerow(row)
 # --- LANCEMENT ---
 # Assure-toi que "steam_games.csv" existe dans le même dossier
 if __name__ == "__main__":
-    get_details_from_existing_csv()
+    cleanup_data()
