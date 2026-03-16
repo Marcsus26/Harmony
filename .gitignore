@@ -113,3 +113,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+.vscode/
+*.csv
+MockupFront/harmony_gui/node_modules
