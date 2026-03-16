@@ -3,84 +3,78 @@ import csv
 import time
 import os
 
-def get_game_details(appid):
-    """Interroge l'API Store pour un AppID précis."""
-    url = "https://store.steampowered.com/api/appdetails"
-    params = {"appids": appid, "l": "french"} # 'l' pour avoir les textes en français
+def get_details_from_existing_csv(input_file="steam_games.csv", output_file="steamspy_details.csv"):
+    """
+    Lit les appids depuis steam_games.csv et récupère les détails via SteamSpy.
+    """
+    url = "https://steamspy.com/api.php"
     
-    try:
-        response = requests.get(url, params=params, timeout=10)
-        if response.status_code == 429:
-            print("⚠️ Rate limit atteint. Pause de 30 secondes...")
-            time.sleep(30)
-            return None
-            
-        data = response.json()
-        if data and str(appid) in data and data[str(appid)]['success']:
-            return data[str(appid)]['data']
-    except Exception as e:
-        print(f"Erreur pour {appid}: {e}")
-    return None
+    # Définition des colonnes souhaitées
+    fieldnames = [
+        'appid', 'name', 'developer', 'publisher', 'score_rank', 
+        'positive', 'negative', 'userscore', 'owners', 
+        'average_forever', 'median_forever', 'price', 'initialprice', 'discount', 'genre'
+    ]
 
-def process_details(input_file="steam_games.csv", output_file="steam_details.csv"):
-    # On définit les colonnes qu'on veut extraire
-    fieldnames = ['appid', 'name', 'type', 'is_free', 'price', 'genres', 'developers']
-    
-    # Vérifier si on doit reprendre un travail en cours
-    existing_ids = set()
+    # 1. On vérifie quels jeux ont déjà été traités pour pouvoir reprendre en cas de coupure
+    processed_ids = set()
     if os.path.exists(output_file):
-        with open(output_file, 'r', encoding='utf-8') as f:
+        with open(output_file, mode='r', encoding='utf-8') as f:
             reader = csv.DictReader(f)
-            existing_ids = {row['appid'] for row in reader}
+            for row in reader:
+                processed_ids.add(row['appid'])
 
-    with open(input_file, 'r', encoding='utf-8') as f_in, \
-         open(output_file, 'a', newline='', encoding='utf-8') as f_out:
+    # 2. Ouverture du fichier source et du fichier destination
+    with open(input_file, mode='r', encoding='utf-8') as f_in, \
+         open(output_file, mode='a', newline='', encoding='utf-8') as f_out:
         
         reader = csv.DictReader(f_in)
         writer = csv.DictWriter(f_out, fieldnames=fieldnames)
         
-        # Si le fichier est vide, on écrit l'en-tête
+        # Si le fichier est nouveau, on écrit l'en-tête
         if os.stat(output_file).st_size == 0:
             writer.writeheader()
 
-        print("Début de la récupération des détails...")
-        
-        for count, row in enumerate(reader):
-            if count > 394:
-                appid = row['appid']
+        print(f"Début de la récupération des détails depuis {input_file}...")
+
+        for row in reader:
+            appid = row['appid']
+            
+            # On saute si déjà fait
+            if appid in processed_ids:
+                continue
+
+            params = {'request': 'appdetails', 'appid': appid}
+            
+            try:
+                response = requests.get(url, params=params)
                 
-                # On saute si déjà traité
-                if appid in existing_ids:
+                if response.status_code == 429:
+                    print("⚠️ Trop de requêtes. Pause de 30s...")
+                    time.sleep(30)
                     continue
+                
+                data = response.json()
 
-                print(f"[{count}] Récupération de : {row['name']} (ID: {appid})...")
-                
-                details = get_game_details(appid)
-                
-                if details:
-                    # Extraction propre des données
-                    price = details.get('price_overview', {}).get('final_formatted', 'N/A')
-                    if details.get('is_free'): price = "Gratuit"
+                if data and 'name' in data:
+                    # Préparation de la ligne
+                    # .get(field, "N/A") permet d'éviter les erreurs si une clé manque
+                    output_row = {field: data.get(field, "N/A") for field in fieldnames}
                     
-                    genres = ", ".join([g['description'] for g in details.get('genres', [])])
-                    devs = ", ".join(details.get('developers', []))
-                    
-                    writer.writerow({
-                        'appid': appid,
-                        'name': details.get('name'),
-                        'type': details.get('type'),
-                        'is_free': details.get('is_free'),
-                        'price': price,
-                        'genres': genres,
-                        'developers': devs
-                    })
-                    
-                    # PAUSE CRITIQUE : Steam autorise environ 1 requête par seconde
-                    # Plus tu es lent, moins tu as de chances d'être banni.
-                    time.sleep(0.2) 
+                    writer.writerow(output_row)
+                    print(f"Récupéré : {data['name']} (ID: {appid})")
                 else:
-                    # Petite pause même si échec
-                    time.sleep(0.5)
+                    print(f"Données invalides pour l'ID {appid}")
 
-# Lancer le processus
-process_details()
+            except Exception as e:
+                print(f"Erreur pour l'ID {appid}: {e}")
+                # En cas d'erreur réseau, on attend un peu
+                time.sleep(0.5)
+                continue
+
+    print(f"\nTerminé ! Les détails sont dans {output_file}")
+
+# --- LANCEMENT ---
+# Assure-toi que "steam_games.csv" existe dans le même dossier
+if __name__ == "__main__":
+    get_details_from_existing_csv()
