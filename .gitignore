@@ -116,3 +116,4 @@ dmypy.json
 .vscode/
 *.csv
 MockupFront/harmony_gui/node_modules
+.DS_Store
