@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import '../../static/css/index.css';
 
-
 function UserAccount({ avatar }){
   const [showSettings, setShowSettings] = useState(false);
 
@@ -24,5 +23,6 @@ function UserAccount({ avatar }){
     </div>
   );
 };
+
 
 export default UserAccount;

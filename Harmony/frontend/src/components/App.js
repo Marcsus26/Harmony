@@ -6,6 +6,8 @@ import ChatArea from "./ChatArea";
 import Sidebar from "./LeftSidebar";
 import RightSidebar from "./RightSidebar";
 import UserAccount from "./UserDetails";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import UserSettingsPage from "./UserSettingsPage";
 
 
 function App() {
@@ -34,16 +36,24 @@ function App() {
   ]);
 
   return (
-    <div className="app-container">
-      <Sidebar friends={friends} servers={servers} />
-      
-      <main className="main-content">
-        <UserAccount avatar={logo} />
-        <ChatArea messages={fakeMessages} />
-      </main>
+    <Router>
+        <Routes>
+          <Route path="/" element={
+            <div className="app-container">
+            <Sidebar friends={friends} servers={servers} />
+            
+              <main className="main-content">
+                <UserAccount avatar={logo} />
+                <ChatArea messages={fakeMessages} />
+              </main>
 
-      <RightSidebar channels={channels} suggestedGames={suggestedGames} />
-    </div>
+            <RightSidebar channels={channels} suggestedGames={suggestedGames} />
+          </div>} />
+          <Route path="/account" element={<UserSettingsPage />} />
+        </Routes>
+    </Router>
+
+
   );
 }
 

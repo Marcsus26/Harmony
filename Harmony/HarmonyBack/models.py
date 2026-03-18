@@ -12,6 +12,7 @@ class Profile(models.Model):
 class Server(models.Model):
     name = models.CharField(max_length=64)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owned_servers')
+    users = models.ManyToManyField(User)
     profile_picture = models.ImageField(upload_to='server_pics/', blank=True)
 
 class Channel(models.Model):
