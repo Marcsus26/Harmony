@@ -8,7 +8,9 @@ import RightSidebar from "./RightSidebar";
 import UserAccount from "./UserDetails";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import UserSettingsPage from "./UserSettingsPage";
-
+import Login from './LoginPage';
+import ProtectedRoute from './ProtectedRoute.jsx';
+import Register from "./Register.js";
 
 function App() {
 
@@ -34,26 +36,30 @@ function App() {
     { title: "Helldivers 2", img: logo },
     { title: "Elden Ring", img: logo }
   ]);
-
+  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('access_token'));
   return (
     <Router>
         <Routes>
-          <Route path="/" element={
-            <div className="app-container">
-            <Sidebar friends={friends} servers={servers} />
-            
-              <main className="main-content">
-                <UserAccount avatar={logo} />
-                <ChatArea messages={fakeMessages} />
-              </main>
+        <Route path="/login" element={<Login setAuth={setIsAuthenticated}/>} />
+          {/* Protected Routes */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/" element={
+              <div className="app-container">
+                <Sidebar friends={friends} servers={servers} />
+              
+                <main className="main-content">
+                  <UserAccount avatar={logo} />
+                  <ChatArea messages={fakeMessages} />
+                </main>
 
-            <RightSidebar channels={channels} suggestedGames={suggestedGames} />
-          </div>} />
+                <RightSidebar channels={channels} suggestedGames={suggestedGames} />
+              </div>
+            } />
+          </Route>
           <Route path="/account" element={<UserSettingsPage />} />
+          <Route path="/register" element={<Register />} />
         </Routes>
     </Router>
-
-
   );
 }
 
