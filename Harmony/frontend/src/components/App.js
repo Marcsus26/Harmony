@@ -1,5 +1,5 @@
 import {createRoot} from "react-dom/client" ;
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../../static/css/index.css';
 import logo from "../../static/images/logo.svg";
 import ChatArea from "./ChatArea";
@@ -11,8 +11,11 @@ import UserSettingsPage from "./UserSettingsPage";
 import Login from './LoginPage';
 import ProtectedRoute from './ProtectedRoute.jsx';
 import Register from "./Register.js";
+import MyProfile from "./MyProfile.js";
+import axios from 'axios';
 
 function App() {
+  const [user, setUser] = useState(null);
 
   const friends = [
     { id: 1, name: "Nelly", status: "online", avatar: logo },
@@ -48,7 +51,7 @@ function App() {
                 <Sidebar friends={friends} servers={servers} />
               
                 <main className="main-content">
-                  <UserAccount avatar={logo} />
+                  <UserAccount avatar={logo} setAuth={setIsAuthenticated} />
                   <ChatArea messages={fakeMessages} />
                 </main>
 
@@ -58,6 +61,7 @@ function App() {
           </Route>
           <Route path="/account" element={<UserSettingsPage />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/profile" element={<MyProfile />} />
         </Routes>
     </Router>
   );
