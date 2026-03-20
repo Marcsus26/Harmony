@@ -3,8 +3,9 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-function UserAccount({ avatar, setAuth }){
+function UserAccount({ setAuth }){
   const [showSettings, setShowSettings] = useState(false);
+  const [profile, setProfile] = useState({ profile_pic_url: '', bio: '' });
   const navigate = useNavigate();
 
   const goToProfile = () => {
@@ -19,10 +20,28 @@ function UserAccount({ avatar, setAuth }){
     navigate('/login');
   };
 
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const token = localStorage.getItem('access_token');
+        const res = await axios.get('http://127.0.0.1:8000/api/profile/update/', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setProfile({
+          profile_pic_url: res.data.profile_pic_url || '',
+          bio: res.data.bio || ''
+        });
+      } catch (err) {
+        console.error("Error fetching profile", err);
+      }
+    };
+    fetchProfile();
+  }, []);
+
   return (
     <div className="user-nav">
       <button className="avatar-btn" onClick={() => setShowSettings(!showSettings)}>
-        <img src={avatar} alt="user" />
+        <img src={profile.profile_pic_url} alt="user" />
       </button>
 
       {showSettings && (

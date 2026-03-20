@@ -51,7 +51,7 @@ function App() {
                 <Sidebar friends={friends} servers={servers} />
               
                 <main className="main-content">
-                  <UserAccount avatar={logo} setAuth={setIsAuthenticated} />
+                  <UserAccount setAuth={setIsAuthenticated} />
                   <ChatArea messages={fakeMessages} />
                 </main>
 

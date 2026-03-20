@@ -45,6 +45,12 @@
   border: 3px solid #23a55a; /* Steam Green */
   padding: 4px; /* Gap between ring and image */
   background-color: #1e1f22;
+
+  overflow: hidden;    /* Clips anything larger than 90px */
+  flex-shrink: 0;      /* Prevents flexbox from squishing/stretching it */
+  display: flex;       /* Centers the image inside the padding */
+  justify-content: center;
+  align-items: center;
 }
 
 .avatar-preview {
@@ -52,6 +58,7 @@
   height: 100%;
   border-radius: 50%;
   object-fit: cover;
+  display: block;
   background-color: #313338;
 }
 
