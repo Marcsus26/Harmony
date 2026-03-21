@@ -1,6 +1,6 @@
 import '../../static/css/index.css';
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { useNavigate } from 'react-router-dom';
 
 function UserAccount({ setAuth }){
@@ -22,18 +22,11 @@ function UserAccount({ setAuth }){
 
   useEffect(() => {
     const fetchProfile = async () => {
-      try {
-        const token = localStorage.getItem('access_token');
-        const res = await axios.get('http://127.0.0.1:8000/api/profile/update/', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setProfile({
-          profile_pic_url: res.data.profile_pic_url || '',
-          bio: res.data.bio || ''
-        });
-      } catch (err) {
-        console.error("Error fetching profile", err);
-      }
+    const res = await api.get('/api/profile/update/'); // No headers needed!
+    setProfile({
+      profile_pic_url: res.data.profile_pic_url,
+      bio: res.data.bio
+    });
     };
     fetchProfile();
   }, []);

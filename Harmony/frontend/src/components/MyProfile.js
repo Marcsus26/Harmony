@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api';
 import '../../static/css/Profile.css';
 import { useNavigate } from 'react-router-dom';
 import logo from "../../static/images/logo.svg";
@@ -10,19 +10,16 @@ function MyProfile() {
   const navigate = useNavigate();
 
   // Load existing data
-  useEffect(() => {
+useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const token = localStorage.getItem('access_token');
-        const res = await axios.get('http://127.0.0.1:8000/api/profile/update/', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await api.get('/api/profile/update/');
         setProfile({
           profile_pic_url: res.data.profile_pic_url || '',
           bio: res.data.bio || ''
         });
       } catch (err) {
-        console.error("Error fetching profile", err);
+        console.error("Could not load profile", err);
       }
     };
     fetchProfile();
@@ -31,16 +28,16 @@ function MyProfile() {
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('access_token');
-      await axios.patch('http://127.0.0.1:8000/api/profile/update/', profile, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.patch('/api/profile/update/', profile);
+      
       setMessage("Profile updated successfully! ✨");
-      setTimeout(() => navigate('/'), 1500); // Send them back to chat
+      setTimeout(() => navigate('/'), 1500); 
     } catch (err) {
+      console.error("Update error:", err);
       setMessage("Failed to update profile.");
     }
   };
+
   return (
     <div className="profile-page-container">
       <div className="profile-card">
