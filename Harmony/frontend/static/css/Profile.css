@@ -1,0 +1,178 @@
+/* Container Background */
+.profile-page-container {
+  background-color: #313338;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* The Main Card */
+.profile-card {
+  background-color: #2b2d31;
+  width: 100%;
+  max-width: 460px;
+  padding: 32px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header & Avatar Preview */
+.profile-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 24px;
+  border-bottom: 1px solid #1e1f22;
+  padding-bottom: 24px;
+}
+
+.profile-header h2 {
+  color: #f2f3f5;
+  margin: 0 0 16px 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+/* Live Preview Ring */
+.avatar-preview-wrapper {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 3px solid #23a55a; /* Steam Green */
+  padding: 4px; /* Gap between ring and image */
+  background-color: #1e1f22;
+
+  overflow: hidden;    /* Clips anything larger than 90px */
+  flex-shrink: 0;      /* Prevents flexbox from squishing/stretching it */
+  display: flex;       /* Centers the image inside the padding */
+  justify-content: center;
+  align-items: center;
+}
+
+.avatar-preview {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  background-color: #313338;
+}
+
+/* Inputs */
+.input-group {
+  margin-bottom: 20px;
+}
+
+.input-group label {
+  display: block;
+  font-size: 12px;
+  color: #b5bac1;
+  font-weight: 800;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.input-group input, 
+.input-group textarea {
+  width: 100%;
+  padding: 12px 14px;
+  background-color: #1e1f22;
+  border: 1px solid #1e1f22;
+  border-radius: 6px;
+  color: #dbdee1;
+  font-size: 14px;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease;
+  outline: none;
+  resize: vertical; /* Only allow vertical resizing for textarea */
+}
+
+/* Input Focus Glow */
+.input-group input:focus, 
+.input-group textarea:focus {
+  border-color: #5865f2; /* Subtle blurple focus ring */
+}
+
+.input-group input::placeholder, 
+.input-group textarea::placeholder {
+  color: #5c5e66;
+}
+
+/* Buttons */
+.button-group {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.save-btn {
+  background-color: #5865f2;
+  color: white;
+  padding: 10px 24px;
+  border-radius: 4px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.save-btn:hover {
+  background-color: #4752c4;
+}
+
+.cancel-btn {
+  background: transparent;
+  color: #dbdee1;
+  padding: 10px 16px;
+  border-radius: 4px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+}
+
+.cancel-btn:hover {
+  text-decoration: underline;
+}
+
+/* Success Message Box */
+.status-msg {
+  color: #23a55a;
+  background-color: rgba(35, 165, 90, 0.1);
+  padding: 12px;
+  border-radius: 6px;
+  text-align: center;
+  margin-bottom: 20px;
+  font-weight: 500;
+  font-size: 14px;
+  border: 1px solid rgba(35, 165, 90, 0.3);
+}
+
+.steam-btn {
+  background-color: #171a21 !important; /* Steam Dark */
+  border: 1px solid #23a55a !important; /* Steam Green border */
+  color: #23a55a !important;
+}
+
+.steam-btn:hover {
+  background-color: #23a55a !important;
+  color: white !important;
+}
+
+.input-help {
+  font-size: 11px;
+  color: #ffffff;
+  margin-top: 8px;
+  line-height: 1.4;
+}
+
+.status-msg.error {
+  color: #f23f43;
+  background-color: rgba(242, 63, 67, 0.1);
+  border-color: rgba(242, 63, 67, 0.3);
+}
