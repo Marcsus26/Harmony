@@ -7,12 +7,11 @@ import Sidebar from "./LeftSidebar";
 import RightSidebar from "./RightSidebar";
 import UserAccount from "./UserDetails";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import UserSettingsPage from "./UserSettingsPage";
+import UserSteamSettingsPage from "./UserSteamSettingsPage";
 import Login from './LoginPage';
 import ProtectedRoute from './ProtectedRoute.jsx';
 import Register from "./Register.js";
 import MyProfile from "./MyProfile.js";
-import axios from 'axios';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -59,7 +58,7 @@ function App() {
               </div>
             } />
           </Route>
-          <Route path="/account" element={<UserSettingsPage />} />
+          <Route path="/steam-settings" element={<UserSteamSettingsPage />} />
           <Route path="/register" element={<Register />} />
           <Route path="/profile" element={<MyProfile />} />
         </Routes>

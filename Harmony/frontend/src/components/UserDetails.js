@@ -20,6 +20,11 @@ function UserAccount({ setAuth }){
     navigate('/login');
   };
 
+  const goToSteam = () => {
+    setShowSettings(false);
+    navigate('/steam-settings');
+  };
+
   useEffect(() => {
     const fetchProfile = async () => {
     const res = await api.get('/api/profile/update/'); // No headers needed!
@@ -41,8 +46,7 @@ function UserAccount({ setAuth }){
         <div className="settings-dropdown">
           <ul>
             <li onClick={goToProfile}>My Profile</li>
-            <li>Steam Integration</li>
-            <li>Privacy Settings</li>
+            <li onClick={goToSteam}>Steam Integration</li>
             <li className="logout" onClick={handleLogout}>Log Out</li>
           </ul>
         </div>

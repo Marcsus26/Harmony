@@ -152,3 +152,27 @@
   font-size: 14px;
   border: 1px solid rgba(35, 165, 90, 0.3);
 }
+
+.steam-btn {
+  background-color: #171a21 !important; /* Steam Dark */
+  border: 1px solid #23a55a !important; /* Steam Green border */
+  color: #23a55a !important;
+}
+
+.steam-btn:hover {
+  background-color: #23a55a !important;
+  color: white !important;
+}
+
+.input-help {
+  font-size: 11px;
+  color: #ffffff;
+  margin-top: 8px;
+  line-height: 1.4;
+}
+
+.status-msg.error {
+  color: #f23f43;
+  background-color: rgba(242, 63, 67, 0.1);
+  border-color: rgba(242, 63, 67, 0.3);
+}

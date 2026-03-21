@@ -9,8 +9,8 @@ function MyProfile() {
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
 
-  // Load existing data
-useEffect(() => {
+
+  useEffect(() => {
     const fetchProfile = async () => {
       try {
         const res = await api.get('/api/profile/update/');
@@ -30,8 +30,8 @@ useEffect(() => {
     try {
       await api.patch('/api/profile/update/', profile);
       
-      setMessage("Profile updated successfully! ✨");
-      setTimeout(() => navigate('/'), 1500); 
+      setMessage("Profile updated successfully!");
+      setTimeout(() => navigate('/'), 250); 
     } catch (err) {
       console.error("Update error:", err);
       setMessage("Failed to update profile.");
