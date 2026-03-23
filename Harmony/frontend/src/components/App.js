@@ -19,16 +19,14 @@ function App() {
   const [servers, setServers] = useState([]);
   const [activeServerId, setActiveServerId] = useState(null);
   const [channels, setChannels] = useState([]);
+  const [activeChannelId, setActiveChannelId] = useState(null);
+  const [messages, setMessages] = useState([]);
 
   const friends = [
     { id: 1, name: "Nelly", status: "online", avatar: logo },
     { id: 2, name: "User123", status: "offline", avatar: logo },
     { id: 3, name: "CodingWizard", status: "online", avatar: logo },
     { id: 4, name: "Gamer99", status: "online", avatar: logo },
-  ];
-  const fakeMessages = [
-    { id: 1, user: "Nelly", time: "Today at 12:00 PM", text: "Yo, did you see the new update?", avatar: logo },
-    { id: 2, user: "User123", time: "Today at 12:01 PM", text: "The CSS is finally working!", avatar: logo },
   ];
 
   const [suggestedGames] = useState([
@@ -47,7 +45,7 @@ function App() {
   };
 
   useEffect(() => {
-    loadServers(); // Load on mount
+    loadServers();
   }, []);
 
   useEffect(() => {
@@ -63,6 +61,55 @@ function App() {
       fetchChannels();
     }
   }, [activeServerId]);
+
+  useEffect(() => {
+    if (servers.length > 0) {
+      setActiveServerId(servers[0].id);
+    }
+  }, [servers])
+
+  useEffect(() => {
+  if (channels.length > 0) {
+    setActiveChannelId(channels[0].id);
+  } else {
+    setActiveChannelId(null);
+    setMessages([]);
+  }
+  }, [channels]);
+
+  useEffect(() => {
+  if (activeChannelId) {
+    const fetchMessagesOG = async () => {
+      try {
+        const res = await api.get(`/api/channels/${activeChannelId}/messages/`);
+        setMessages(res.data);
+      } catch (err) {
+        console.error("Error fetching messages", err);
+      }
+    };
+    fetchMessagesOG();
+  }
+  }, [activeChannelId]);
+
+  const fetchChannels = async () => {
+  if (!activeServerId) return;
+  try {
+    const res = await api.get(`/api/servers/${activeServerId}/channels/`);
+    setChannels(res.data);
+  } catch (err) {
+    console.error(err);
+  }
+  };
+
+  useEffect(() => {
+    fetchChannels();
+  }, [activeServerId]);
+
+  const fetchMessages = async () => {
+    if (!activeChannelId) return;
+    const res = await api.get(`/api/channels/${activeChannelId}/messages/`);
+    setMessages(res.data);
+  };
 
   return (
     <Router>
@@ -80,10 +127,17 @@ function App() {
               
                 <main className="main-content">
                   <UserAccount setAuth={setIsAuthenticated} />
-                  <ChatArea messages={fakeMessages} />
+                  <ChatArea messages={messages}
+                  activeChannelId={activeChannelId} 
+                  onMessageSent={fetchMessages}/>
                 </main>
 
-                <RightSidebar channels={channels} suggestedGames={suggestedGames} />
+                <RightSidebar channels={channels} 
+                suggestedGames={suggestedGames}
+                activeServerId={activeServerId}
+                activeChannelId={activeChannelId} 
+                onSelectChannel={setActiveChannelId}
+                onChannelCreated={fetchChannels} />
               </div>
             } />
           </Route>

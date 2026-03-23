@@ -2,6 +2,7 @@ import '../../static/css/index.css';
 import React, { useState, useEffect } from 'react';
 import api from '../api';
 import { useNavigate } from 'react-router-dom';
+import logo from "../../static/images/logo.svg";
 
 function UserAccount({ setAuth }){
   const [showSettings, setShowSettings] = useState(false);
@@ -27,7 +28,7 @@ function UserAccount({ setAuth }){
 
   useEffect(() => {
     const fetchProfile = async () => {
-    const res = await api.get('/api/profile/update/'); // No headers needed!
+    const res = await api.get('/api/profile/update/');
     setProfile({
       profile_pic_url: res.data.profile_pic_url,
       bio: res.data.bio
@@ -39,7 +40,7 @@ function UserAccount({ setAuth }){
   return (
     <div className="user-nav">
       <button className="avatar-btn" onClick={() => setShowSettings(!showSettings)}>
-        <img src={profile.profile_pic_url} alt="user" />
+        <img src={profile.profile_pic_url != '' ?  profile.profile_pic_url : logo} alt="user" />
       </button>
 
       {showSettings && (

@@ -45,3 +45,12 @@ class ChannelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Channel
         fields = ['id', 'name', 'server']
+
+class MessageSerializer(serializers.ModelSerializer):
+    author = serializers.ReadOnlyField(source='author.id')
+    channel = serializers.ReadOnlyField(source='channel.id')
+    author_name = serializers.ReadOnlyField(source='author.username')
+    author_avatar = serializers.ReadOnlyField(source='author.profile.profile_pic_url')
+    class Meta:
+        model = Message
+        fields = ['id', 'content', 'author', 'author_name', 'channel', 'timestamp', "author_avatar"]

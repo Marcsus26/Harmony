@@ -48,6 +48,21 @@ body, html {
   color: white;
 }
 
+.channel-item.active {
+  background-color: #404249; /* Slightly lighter highlight than hover */
+  color: #ffffff; /* Pure white text for the active channel */
+}
+
+.channel-item.active::before {
+  content: "";
+  position: absolute;
+  left: -8px;
+  width: 4px;
+  height: 24px;
+  background-color: white;
+  border-radius: 0 4px 4px 0;
+}
+
 /* TOP RIGHT USER BUTTON */
 .user-nav {
   position: absolute;
@@ -218,6 +233,10 @@ body, html {
   display: block;
 }
 
+.server-name {
+  color: white;
+}
+
 .main-content {
   flex: 1;
   position: relative;
@@ -300,6 +319,7 @@ body, html {
 .input-container {
   flex-shrink: 0;
   padding: 10px 16px 20px 16px;
+  align-items: end;
 }
 
 .discord-input {
@@ -454,4 +474,111 @@ body, html {
   display: flex;
   justify-content: space-between;
   margin-top: 30px;
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 10px 8px 16px;
+}
+
+.add-btn {
+  background: none;
+  border: none;
+  color: #949ba4;
+  font-size: 20px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.add-btn:hover {
+  color: #dbdee1;
+}
+
+/* Modal styling for the # prefix */
+.channel-input-wrapper {
+  display: flex;
+  align-items: center;
+  background: #1e1f22;
+  border-radius: 4px;
+  padding: 0 10px;
+}
+
+.hash-prefix {
+  color: #80848e;
+  font-size: 20px;
+  margin-right: 5px;
+}
+
+.channel-input-wrapper input {
+  background: transparent;
+  border: none;
+  color: white;
+  padding: 10px 0;
+  width: 100%;
+  outline: none;
+}
+
+.panel-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.edit-server-btn {
+  background: none;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+.edit-server-btn:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.member-select-item span {
+  font-size: 14px;
+  color: #dbdee1;
+}
+
+.input-wrapper {
+  position: relative; /* Anchor for the picker */
+  display: flex;
+  align-items: center;
+  background-color: #383a40;
+  border-radius: 8px;
+  padding: 0 12px;
+}
+
+.emoji-picker-container {
+  position: absolute;
+  bottom: 50px; /* Sits right above the input bar */
+  right: 0;
+  z-index: 1000;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+
+/* Make the actual picker match your theme better */
+.epr-main {
+  border: none !important;
+  background-color: #2b2d31 !important;
+}
+
+.emoji-button {
+  background: none;
+  border: none;
+  color: #b5bac1; /* Muted color */
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.emoji-button:hover {
+  color: #ffcc4d; /* Yellowish on hover */
 }

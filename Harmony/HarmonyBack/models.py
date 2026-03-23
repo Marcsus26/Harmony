@@ -28,6 +28,8 @@ class Message(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='messages')
     channel = models.ForeignKey(Channel, on_delete=models.CASCADE, related_name='messages')
     timestamp = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        ordering = ['timestamp']
 
 class FriendRequest(models.Model):
     from_user = models.ForeignKey(

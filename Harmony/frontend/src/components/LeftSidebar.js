@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../../static/css/index.css';
 import logo from "../../static/images/logo.svg";
 import api from '../api.js';
@@ -60,26 +60,56 @@ function Sidebar({ friends, servers, onServerCreated, activeServerId, onSelectSe
   const [name, setName] = useState('');
   const [iconUrl, setIconUrl] = useState('');
   const [selectedFriends, setSelectedFriends] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
+
+  const currentServer = servers.find(s => s.id === activeServerId);
 
   const toggleFriend = (id) => {
     setSelectedFriends(prev => 
       prev.includes(id) ? prev.filter(fid => fid !== id) : [...prev, id]
     );
   };
-  
-  const handleCreate = async (e) => {
+
+  const openCreateModal = () => {
+    setIsEditing(false);
+    setName('');
+    setIconUrl('');
+    setSelectedFriends([]);
+    setShowModal(true);
+  };
+
+
+  const openEditModal = () => {
+    if (!currentServer) return;
+    setIsEditing(true);
+    setName(currentServer.name);
+    setIconUrl(currentServer.icon_url || '');
+    setSelectedFriends(currentServer.users || []); 
+    setShowModal(true);
+  };
+
+  const handleSave = async (e) => {
     e.preventDefault();
     try {
-      await api.post('/api/servers/create/', {
-        name: name,
-        icon_url: iconUrl,
-        users: selectedFriends // Sending IDs of friends to add
-      });
+      if (isEditing) {
+        await api.patch(`/api/servers/${activeServerId}/update-members/`, {
+          users: selectedFriends,
+          name: name,
+          icon_url: iconUrl
+        });
+      } else {
+        // POST new server
+        await api.post('/api/servers/create/', {
+          name: name,
+          icon_url: iconUrl,
+          users: selectedFriends
+        });
+      }
+      
       setShowModal(false);
-      setName(''); setIconUrl(''); setSelectedFriends([]);
-      if (onServerCreated) onServerCreated(); // Trigger the refresh in App.js
+      if (onServerCreated) onServerCreated(); // Refresh the list
     } catch (err) {
-      alert("Failed to create server");
+      alert(isEditing ? "Failed to update server" : "Failed to create server");
     }
   };
 
@@ -100,7 +130,11 @@ function Sidebar({ friends, servers, onServerCreated, activeServerId, onSelectSe
     .join('')
     .substring(0, 3)
     .toUpperCase();
-};
+  };
+
+  useEffect(() => {
+    onServerCreated();
+  }, []);
 
   return (
     <div className="sidebar">
@@ -121,19 +155,25 @@ function Sidebar({ friends, servers, onServerCreated, activeServerId, onSelectSe
             <span>SERVERS</span>
             <span>{isExpanded ? ' ▼' : ' ▲'}</span>
           </div>
-          <button className="add-server-btn" onClick={() => setShowModal(true)}>+</button>
+          <div className="panel-buttons">
+            {activeServerId && (
+              <button className="edit-server-btn" onClick={openEditModal} title="Manage Server">⚙️</button>
+            )}
+            <button className="add-server-btn" onClick={openCreateModal}>+</button>
+          </div>
         </div>
 
         {isExpanded && (
           <div className="server-list">
             {servers.map(server => (
               <div key={server.id} 
-              onClick={() => onSelectServer(server.id)} 
-              className={`server-item ${activeServerId === server.id ? 'active' : ''}`}
-              title={server.name}>
+                onClick={() => onSelectServer(server.id)} 
+                className={`server-item ${activeServerId === server.id ? 'active' : ''}`}
+                title={server.name}>
                 <div className="server-icon">
                   {server.icon_url ? <img src={server.icon_url} alt="" /> : <span>{getServerInitials(server.name)}</span>}
                 </div>
+                <div className='server-name'>{server.name}</div>
               </div>
             ))}
           </div>
@@ -143,10 +183,10 @@ function Sidebar({ friends, servers, onServerCreated, activeServerId, onSelectSe
       {showModal && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3>Create Your Server</h3>
-            <p>Give your new server a personality with a name and an icon.</p>
+            <h3>{isEditing ? 'Manage Server' : 'Create Your Server'}</h3>
+            <p>{isEditing ? 'Update your server details or member list.' : 'Give your new server a personality.'}</p>
             
-            <form onSubmit={handleCreate}>
+            <form onSubmit={handleSave}>
               <div className="input-group">
                 <label>SERVER NAME</label>
                 <input required value={name} onChange={e => setName(e.target.value)} placeholder="Enter server name" />
@@ -158,7 +198,7 @@ function Sidebar({ friends, servers, onServerCreated, activeServerId, onSelectSe
               </div>
 
               <div className="member-select-section">
-                <label>INVITE FRIENDS</label>
+                <label>{isEditing ? 'MANAGE MEMBERS' : 'INVITE FRIENDS'}</label>
                 <div className="member-list-scroll">
                   {friends.map(f => (
                     <div key={f.id} className="member-select-item">
@@ -175,7 +215,7 @@ function Sidebar({ friends, servers, onServerCreated, activeServerId, onSelectSe
 
               <div className="modal-actions">
                 <button type="button" className="cancel-btn" onClick={() => setShowModal(false)}>Back</button>
-                <button type="submit" className="save-btn">Create</button>
+                <button type="submit" className="save-btn">{isEditing ? 'Save Changes' : 'Create'}</button>
               </div>
             </form>
           </div>

@@ -66,8 +66,8 @@ function Login({ setAuth }) {
 
         <button type="submit" className="login-button">Log In</button>
         
-        <p className="register-link">
-          Need an account? <a href="/register">Register</a>
+        <p>
+          Need an account? <a className='register-link' href="/register">Register</a>
         </p>
       </form>
     </div>
