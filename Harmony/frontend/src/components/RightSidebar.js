@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import '../../static/css/index.css';
 import api from '../api.js';
 
