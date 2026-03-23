@@ -659,3 +659,64 @@ body, html {
   justify-content: space-between;
   margin-top: 30px;
 }
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 30px;
+}
+
+.right-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.delete-server-btn {
+  background: none;
+  border: none;
+  color: #da373c; /* Discord's Red */
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 8px 0;
+}
+
+.delete-server-btn:hover {
+  text-decoration: underline;
+}
+
+.cancel-btn {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 10px 20px;
+}
+
+.save-btn {
+  background-color: #5865f2; /* Discord Blue */
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.save-btn:hover {
+  background-color: #4752c4;
+}
+
+.leave-server-btn {
+  background: none;
+  border: none;
+  color: #f0b232; /* Warning Orange */
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.leave-server-btn:hover {
+  text-decoration: underline;
+}

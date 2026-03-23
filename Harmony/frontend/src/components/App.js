@@ -36,6 +36,7 @@ function App() {
     try {
       const serverRes = await api.get('/api/servers/my-servers/');
       setServers(serverRes.data);
+      fetchChannels();
     } catch (err) {
       console.error("Error loading servers:", err);
     }
@@ -156,6 +157,14 @@ function App() {
     setSuggestionsRefreshKey((prev) => prev + 1);
   };
 
+  useEffect(() => {
+     const fetchCurrentUser = async () => {
+      const me =  await api.get('/api/auth/me/');
+      setUser(me.data);
+     };
+     fetchCurrentUser();
+  }, [])
+
   return (
     <Router>
         <Routes>
@@ -168,7 +177,8 @@ function App() {
                 servers={servers} 
                 onServerCreated={loadServers} 
                 activeServerId={activeServerId} 
-                onSelectServer={setActiveServerId} />
+                onSelectServer={setActiveServerId} 
+                currentUser={user}/>
               
                 <main className="main-content">
                   <UserAccount setAuth={setIsAuthenticated} />

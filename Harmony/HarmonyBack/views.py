@@ -212,3 +212,35 @@ class ServerUpdateMembersView(generics.UpdateAPIView):
         request.data['users'] = user_ids
 
         return self.partial_update(request, *args, **kwargs)
+    
+class ServerDeleteView(generics.DestroyAPIView):
+    queryset = Server.objects.all()
+    permission_classes = [IsAuthenticated]
+
+    def perform_destroy(self, instance):
+        # SECURITY: Ensure only the owner can delete the server
+        if instance.owner != self.request.user:
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("You do not have permission to delete this server.")
+        instance.delete()
+
+class ServerLeaveView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        try:
+            server = Server.objects.get(pk=pk)
+            
+            # If the owner tries to leave, tell them they must delete instead
+            if server.owner == request.user:
+                return Response(
+                    {"detail": "Owners cannot leave their own server. Delete it instead."}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Remove the user from the relationship
+            server.users.remove(request.user)
+            return Response({"detail": "Successfully left the server"}, status=status.HTTP_200_OK)
+            
+        except Server.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)

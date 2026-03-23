@@ -54,7 +54,7 @@ function ServerItem({ icon, name }) {
     )
 };
 
-function Sidebar({ friends, servers, onServerCreated, activeServerId, onSelectServer }) {
+function Sidebar({ friends, servers, onServerCreated, activeServerId, onSelectServer, currentUser }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [name, setName] = useState('');
@@ -63,11 +63,27 @@ function Sidebar({ friends, servers, onServerCreated, activeServerId, onSelectSe
   const [isEditing, setIsEditing] = useState(false);
 
   const currentServer = servers.find(s => s.id === activeServerId);
+  const isOwner = currentServer ? currentServer?.owner === currentUser?.id : true;
+
 
   const toggleFriend = (id) => {
     setSelectedFriends(prev => 
       prev.includes(id) ? prev.filter(fid => fid !== id) : [...prev, id]
     );
+  };
+
+  const handleLeave = async () => {
+    if (!window.confirm(`Are you sure you want to leave ${currentServer.name}?`)) return;
+
+    try {
+      await api.post(`/api/servers/${activeServerId}/leave/`);
+      
+      setShowModal(false);
+      onSelectServer(null);
+      onServerCreated();
+    } catch (err) {
+      alert("Error leaving server");
+    }
   };
 
   const openCreateModal = () => {
@@ -135,6 +151,26 @@ function Sidebar({ friends, servers, onServerCreated, activeServerId, onSelectSe
   useEffect(() => {
     onServerCreated();
   }, []);
+
+  const handleDelete = async () => {
+  // Always good to double-check before deleting!
+  if (!window.confirm(`Are you sure you want to delete "${currentServer.name}"? This cannot be undone.`)) {
+    return;
+  }
+
+  try {
+    await api.delete(`/api/servers/${activeServerId}/delete/`);
+    
+    setShowModal(false);
+    
+    if (onSelectServer) onSelectServer(null);
+    
+    if (onServerCreated) onServerCreated();
+  } catch (err) {
+    console.error(err);
+    alert("Failed to delete server. Only the owner can delete a server.");
+  }
+};
 
   return (
     <div className="sidebar">
@@ -212,10 +248,24 @@ function Sidebar({ friends, servers, onServerCreated, activeServerId, onSelectSe
                   ))}
                 </div>
               </div>
-
               <div className="modal-actions">
-                <button type="button" className="cancel-btn" onClick={() => setShowModal(false)}>Back</button>
-                <button type="submit" className="save-btn">{isEditing ? 'Save Changes' : 'Create'}</button>
+                <div className="left-actions">
+                  {isEditing && (
+                      isOwner ? (
+                      <button type="button" className="delete-server-btn" onClick={handleDelete}>
+                        Delete Server
+                      </button>
+                    ) : (
+                      <button type="button" className="leave-server-btn" onClick={handleLeave}>
+                        Leave Server
+                      </button>
+                    )
+                  )}
+                </div>
+                <div className="right-actions">
+                  <button type="button" className="cancel-btn" onClick={() => setShowModal(false)}>Back</button>
+                  {isOwner && <button type="submit" className="save-btn">{isEditing ? 'Save Changes' : 'Create'}</button>}
+                </div>
               </div>
             </form>
           </div>
