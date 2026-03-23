@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import '../../static/css/index.css';
 import api from '../api.js';
 
 
-function RightSidebar({ channels, suggestedGames, activeChannelId, onSelectChannel, onChannelCreated, activeServerId }) {
+function RightSidebar({ channels, suggestedGames, activeChannelId, onSelectChannel, onChannelCreated, activeServerId, hasSteamLinked, isLoadingSuggestions }) {
   const [showModal, setShowModal] = useState(false);
   const [newChannelName, setNewChannelName] = useState('');
 
@@ -39,9 +39,18 @@ function RightSidebar({ channels, suggestedGames, activeChannelId, onSelectChann
             
             <div className="panel games-panel">
             <p className="sidebar-label">RECOMENDED FOR YOU</p>
+            {isLoadingSuggestions && (
+                <div className="channel-item">Loading recommendations...</div>
+            )}
+            {!isLoadingSuggestions && !hasSteamLinked && (
+                <div className="channel-item">Connect your Steam account to see suggestions.</div>
+            )}
+            {!isLoadingSuggestions && hasSteamLinked && suggestedGames.length === 0 && (
+                <div className="channel-item">No recommendations found yet.</div>
+            )}
             {suggestedGames.map(game => (
-                <div key={game.title} className="game-card">
-                <img src={game.img} alt="game" />
+                <div key={game.id || game.title} className="game-card">
+                <img src={game.img} alt={game.title} />
                 <span>{game.title}</span>
                 </div>
             ))}

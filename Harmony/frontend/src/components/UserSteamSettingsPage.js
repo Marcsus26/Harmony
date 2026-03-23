@@ -3,7 +3,7 @@ import api from '../api';
 import '../../static/css/Profile.css'; // Reusing your profile styles
 import { useNavigate } from 'react-router-dom';
 
-function SteamIntegration() {
+function SteamIntegration({ onSteamLinked }) {
   const [steamId, setSteamId] = useState('');
   const [message, setMessage] = useState('');
   const [isError, setIsError] = useState(false);
@@ -27,6 +27,9 @@ function SteamIntegration() {
     try {
       // We only send the steam_id field
       await api.patch('/api/auth/me/', { steam_id: steamId });
+      if (typeof onSteamLinked === 'function') {
+        onSteamLinked();
+      }
       setMessage("Steam ID linked successfully!");
       setTimeout(() => navigate('/'), 1500);
     } catch (err) {

@@ -6,6 +6,7 @@ import ChatArea from "./ChatArea";
 import Sidebar from "./LeftSidebar";
 import RightSidebar from "./RightSidebar";
 import UserAccount from "./UserDetails";
+import api from "../api";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import UserSteamSettingsPage from "./UserSteamSettingsPage";
 import Login from './LoginPage';
@@ -29,10 +30,7 @@ function App() {
     { id: 4, name: "Gamer99", status: "online", avatar: logo },
   ];
 
-  const [suggestedGames] = useState([
-    { title: "Helldivers 2", img: logo },
-    { title: "Elden Ring", img: logo }
-  ]);
+  const [suggestedGames, setSuggestedGames] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('access_token'));
 
   const loadServers = async () => {
@@ -111,6 +109,54 @@ function App() {
     setMessages(res.data);
   };
 
+  const [hasSteamLinked, setHasSteamLinked] = useState(false);
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+  const [suggestionsRefreshKey, setSuggestionsRefreshKey] = useState(0);
+
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (!localStorage.getItem('access_token')) {
+        setSuggestedGames([]);
+        setHasSteamLinked(false);
+        return;
+      }
+
+      try {
+        setIsLoadingSuggestions(true);
+        const meResponse = await api.get('/api/auth/me/');
+        const steamId = meResponse.data?.steam_id;
+
+        if (!steamId) {
+          setHasSteamLinked(false);
+          setSuggestedGames([]);
+          return;
+        }
+
+        setHasSteamLinked(true);
+        const response = await api.get('/api/games/suggestions/');
+        const games = (response.data?.results || []).map((game) => ({
+          id: game.appid,
+          title: game.name,
+          img: game.appid
+            ? `https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/header.jpg`
+            : logo,
+        }));
+        setSuggestedGames(games);
+      } catch (error) {
+        console.error('Failed to fetch game suggestions', error);
+        setSuggestedGames([]);
+      } finally {
+        setIsLoadingSuggestions(false);
+      }
+    };
+
+    fetchSuggestions();
+  }, [isAuthenticated, suggestionsRefreshKey]);
+
+  const handleSteamLinked = () => {
+    setSuggestionsRefreshKey((prev) => prev + 1);
+  };
+
   return (
     <Router>
         <Routes>
@@ -133,15 +179,18 @@ function App() {
                 </main>
 
                 <RightSidebar channels={channels} 
-                suggestedGames={suggestedGames}
-                activeServerId={activeServerId}
-                activeChannelId={activeChannelId} 
-                onSelectChannel={setActiveChannelId}
-                onChannelCreated={fetchChannels} />
+                  activeServerId={activeServerId}
+                  activeChannelId={activeChannelId} 
+                  onSelectChannel={setActiveChannelId}
+                  onChannelCreated={fetchChannels}
+                  suggestedGames={suggestedGames}
+                  hasSteamLinked={hasSteamLinked}
+                  isLoadingSuggestions={isLoadingSuggestions}
+                />
               </div>
             } />
           </Route>
-          <Route path="/steam-settings" element={<UserSteamSettingsPage />} />
+          <Route path="/steam-settings" element={<UserSteamSettingsPage onSteamLinked={handleSteamLinked} />} />
           <Route path="/register" element={<Register />} />
           <Route path="/profile" element={<MyProfile />} />
         </Routes>

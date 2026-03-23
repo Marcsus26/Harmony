@@ -1,9 +1,11 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+from pathlib import Path
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny
 from .serializers import UserSerializer, RegisterSerializer, ProfileSerializer, ServerSerializer, ServerCreateSerializer, ChannelSerializer, MessageSerializer
 from .models import User, Server, Channel, Message
+from .suggestion_games import get_top_5_recommendations
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -114,3 +116,27 @@ class ServerUpdateMembersView(generics.UpdateAPIView):
         request.data['users'] = user_ids
 
         return self.partial_update(request, *args, **kwargs)
+
+
+class GameSuggestionsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        steam_id = request.user.steam_id
+        if not steam_id:
+            return Response(
+                {"detail": "No Steam ID linked to this account.", "results": []},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        csv_path = Path(__file__).resolve().parent / "steamspy_details_cleaned.csv"
+
+        try:
+            recommendations = get_top_5_recommendations(steam_id, csv_path)
+            payload = recommendations.reset_index().rename(columns={"index": "appid"}).to_dict(orient='records')
+            return Response({"results": payload}, status=status.HTTP_200_OK)
+        except Exception as exc:
+            return Response(
+                {"detail": f"Failed to build recommendations: {exc}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
