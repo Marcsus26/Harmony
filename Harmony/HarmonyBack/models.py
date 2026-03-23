@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.conf import settings
 
 class User(AbstractUser):
     steam_id = models.BigIntegerField(unique=True, null=True, blank=True)
@@ -13,8 +14,10 @@ class Profile(models.Model):
 class Server(models.Model):
     name = models.CharField(max_length=64)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owned_servers')
-    users = models.ManyToManyField(User)
-    profile_picture = models.ImageField(upload_to='server_pics/', blank=True)
+    icon_url = models.URLField(blank=True, null=True)
+    users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='joined_servers')
+    def __str__(self):
+        return self.name
 
 class Channel(models.Model):
     name = models.CharField(max_length=64)

@@ -8,7 +8,7 @@ function RightSidebar({ channels, suggestedGames }) {
             <div className="panel channel-panel">
             <p className="sidebar-label">SERVER CHANNELS</p>
             {channels.map(chan => (
-                <div key={chan} className="channel-item"># {chan}</div>
+                <div key={chan} className="channel-item"># {chan.name}</div>
             ))}
             </div>
             

@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import User, Server, Profile, Channel, Message
+from django.contrib.auth import get_user_model
 
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -23,3 +24,24 @@ class RegisterSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
         return user
+
+class ServerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Server
+        fields = ['id', 'name', 'owner', 'icon_url']
+
+class ServerCreateSerializer(serializers.ModelSerializer):
+    User = get_user_model()
+    users = serializers.PrimaryKeyRelatedField(many=True, queryset=User.objects.all(), required=False)
+
+    class Meta:
+        model = Server
+        fields = ['id', 'name', 'icon_url', 'users']
+
+class ChannelSerializer(serializers.ModelSerializer):
+    # We include the server ID as a read-only field
+    server = serializers.ReadOnlyField(source='server.id')
+
+    class Meta:
+        model = Channel
+        fields = ['id', 'name', 'server']

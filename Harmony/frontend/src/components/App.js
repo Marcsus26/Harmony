@@ -12,9 +12,13 @@ import Login from './LoginPage';
 import ProtectedRoute from './ProtectedRoute.jsx';
 import Register from "./Register.js";
 import MyProfile from "./MyProfile.js";
+import api from "../api.js";
 
 function App() {
   const [user, setUser] = useState(null);
+  const [servers, setServers] = useState([]);
+  const [activeServerId, setActiveServerId] = useState(null);
+  const [channels, setChannels] = useState([]);
 
   const friends = [
     { id: 1, name: "Nelly", status: "online", avatar: logo },
@@ -27,18 +31,39 @@ function App() {
     { id: 2, user: "User123", time: "Today at 12:01 PM", text: "The CSS is finally working!", avatar: logo },
   ];
 
-  const servers = [
-    { id: 1, name: "The Dev Hub", icon: "DH" },
-    { id: 2, name: "Gaming Zone", icon: "GZ" },
-    { id: 3, name: "Study Group", icon: "SG" },
-  ];
-
-  const [channels] = useState(["general", "dev-log", "voice-chat"]);
   const [suggestedGames] = useState([
     { title: "Helldivers 2", img: logo },
     { title: "Elden Ring", img: logo }
   ]);
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('access_token'));
+
+  const loadServers = async () => {
+    try {
+      const serverRes = await api.get('/api/servers/my-servers/');
+      setServers(serverRes.data);
+    } catch (err) {
+      console.error("Error loading servers:", err);
+    }
+  };
+
+  useEffect(() => {
+    loadServers(); // Load on mount
+  }, []);
+
+  useEffect(() => {
+    if (activeServerId) {
+      const fetchChannels = async () => {
+        try {
+          const res = await api.get(`/api/servers/${activeServerId}/channels/`);
+          setChannels(res.data);
+        } catch (err) {
+          console.error("Error fetching channels", err);
+        }
+      };
+      fetchChannels();
+    }
+  }, [activeServerId]);
+
   return (
     <Router>
         <Routes>
@@ -47,7 +72,11 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={
               <div className="app-container">
-                <Sidebar friends={friends} servers={servers} />
+                <Sidebar friends={friends}
+                servers={servers} 
+                onServerCreated={loadServers} 
+                activeServerId={activeServerId} 
+                onSelectServer={setActiveServerId} />
               
                 <main className="main-content">
                   <UserAccount setAuth={setIsAuthenticated} />

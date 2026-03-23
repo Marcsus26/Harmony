@@ -184,15 +184,38 @@ body, html {
   font-size: 14px;
 }
 
+.server-item.active::before {
+  content: "";
+  position: absolute;
+  left: -4px;
+  width: 8px;
+  height: 20px;
+  background-color: white;
+  border-radius: 0 4px 4px 0;
+}
+
+.server-item:hover .server-icon {
+  border-radius: 30%; /* Smoothly changes from circle to rounded square */
+  transition: border-radius 0.2s ease-in-out;
+  cursor: pointer;
+}
+
 .server-icon {
   width: 30px;
   height: 30px;
-  background-color: #313338;
-  border-radius: 8px;
+  border-radius: 50%; /* Makes it circular like Discord */
+  overflow: hidden;    /* Cuts off any part of the image that's too big */
   display: flex;
-  align-items: center;
   justify-content: center;
-  font-size: 10px;
+  align-items: center;
+  background-color: #313338; /* Dark grey fallback background */
+}
+
+.server-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* This is the magic: it crops the image to fill the square without stretching */
+  display: block;
 }
 
 .main-content {
@@ -375,4 +398,60 @@ body, html {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis; /* Keeps long titles like "Helldivers 2" from breaking the layout */
+}
+
+/* Sidebar Add Button */
+.add-server-btn {
+  background: none;
+  border: none;
+  color: #23a55a;
+  font-size: 20px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.add-server-btn:hover { transform: scale(1.2); color: #2db86a; }
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #313338;
+  padding: 30px;
+  border-radius: 8px;
+  width: 400px;
+  color: white;
+}
+
+.modal-content h3 { text-align: center; margin-bottom: 10px; }
+.modal-content p { color: #b5bac1; text-align: center; font-size: 14px; margin-bottom: 20px; }
+
+.member-select-section { margin-top: 20px; }
+.member-list-scroll {
+  max-height: 150px;
+  overflow-y: auto;
+  background: #1e1f22;
+  border-radius: 4px;
+  padding: 10px;
+  margin-top: 10px;
+}
+
+.member-select-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #2b2d31;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 30px;
 }
