@@ -6,7 +6,6 @@ import ChatArea from "./ChatArea";
 import Sidebar from "./LeftSidebar";
 import RightSidebar from "./RightSidebar";
 import UserAccount from "./UserDetails";
-import api from "../api";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import UserSteamSettingsPage from "./UserSteamSettingsPage";
 import Login from './LoginPage';
@@ -165,6 +164,11 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={
               <div className="app-container">
+                <Sidebar friends={friends}
+                servers={servers} 
+                onServerCreated={loadServers} 
+                activeServerId={activeServerId} 
+                onSelectServer={setActiveServerId} />
                 <Sidebar friends={friends}
                 servers={servers} 
                 onServerCreated={loadServers} 

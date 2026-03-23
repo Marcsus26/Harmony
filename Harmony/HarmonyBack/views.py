@@ -3,8 +3,8 @@ from django.http import HttpResponse
 from pathlib import Path
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny
-from .serializers import UserSerializer, RegisterSerializer, ProfileSerializer, ServerSerializer, ServerCreateSerializer, ChannelSerializer, MessageSerializer
-from .models import User, Server, Channel, Message
+from .serializers import UserSerializer, RegisterSerializer, ProfileSerializer, ServerSerializer, ServerCreateSerializer, ChannelSerializer, MessageSerializer, ServerSerializer, ServerCreateSerializer, ChannelSerializer
+from .models import User, Server, Channel, Message, Server, Channel
 from .suggestion_games import get_top_5_recommendations
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -140,3 +140,31 @@ class GameSuggestionsView(APIView):
                 {"detail": f"Failed to build recommendations: {exc}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+    
+class UserServersView(generics.ListAPIView):
+    serializer_class = ServerSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Server.objects.filter(users=self.request.user)
+    
+class ServerCreateView(generics.CreateAPIView):
+    serializer_class = ServerCreateSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        server = serializer.save(owner=self.request.user)
+        server.users.add(self.request.user)
+        Channel.objects.create(
+            name="general", 
+            server=server
+        )
+
+class ServerChannelsView(generics.ListAPIView):
+    serializer_class = ChannelSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        # Grab the server ID from the URL
+        server_id = self.kwargs['server_id']
+        return Channel.objects.filter(server_id=server_id)
