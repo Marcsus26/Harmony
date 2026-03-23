@@ -3,8 +3,8 @@ from django.http import HttpResponse
 from pathlib import Path
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny
-from .serializers import UserSerializer, RegisterSerializer, ProfileSerializer, ServerSerializer, ServerCreateSerializer, ChannelSerializer, MessageSerializer, ServerSerializer, ServerCreateSerializer, ChannelSerializer
-from .models import User, Server, Channel, Message, Server, Channel
+from .serializers import UserSerializer, RegisterSerializer, ProfileSerializer, ServerSerializer, ServerCreateSerializer, ChannelSerializer, MessageSerializer, ServerSerializer, ServerCreateSerializer, ChannelSerializer, MessageSerializer
+from .models import User, Server, Channel, Message, Server, Channel, Message
 from .suggestion_games import get_top_5_recommendations
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -168,3 +168,47 @@ class ServerChannelsView(generics.ListAPIView):
         # Grab the server ID from the URL
         server_id = self.kwargs['server_id']
         return Channel.objects.filter(server_id=server_id)
+    
+class ChannelMessagesView(generics.ListAPIView):
+    serializer_class = MessageSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Message.objects.filter(channel_id=self.kwargs['channel_id'])
+    
+class ChannelCreateView(generics.CreateAPIView):
+    serializer_class = ChannelSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        # Grab the server_id from the URL and link the channel to it
+        server = Server.objects.get(id=self.kwargs['server_id'])
+        serializer.save(server=server)
+
+class MessageCreateView(generics.CreateAPIView):
+    serializer_class = MessageSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        channel = Channel.objects.get(id=self.kwargs['channel_id'])
+        serializer.save(author=self.request.user, channel=channel)
+
+class ServerUpdateMembersView(generics.UpdateAPIView):
+    queryset = Server.objects.all()
+    serializer_class = ServerCreateSerializer
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, *args, **kwargs):
+        server = self.get_object()
+        
+        if server.owner != request.user:
+            return Response({"detail": "Not authorized"}, status=status.HTTP_403_FORBIDDEN)
+        user_ids = request.data.get('users', [])
+        
+        owner_id = request.user.id
+        if owner_id not in user_ids:
+            user_ids.append(owner_id)
+
+        request.data['users'] = user_ids
+
+        return self.partial_update(request, *args, **kwargs)

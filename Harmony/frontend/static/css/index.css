@@ -251,6 +251,10 @@ body, html {
   display: block;
 }
 
+.server-name {
+  color: white;
+}
+
 .main-content {
   flex: 1;
   position: relative;

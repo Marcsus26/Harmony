@@ -156,6 +156,55 @@ function App() {
     setSuggestionsRefreshKey((prev) => prev + 1);
   };
 
+  useEffect(() => {
+    if (servers.length > 0) {
+      setActiveServerId(servers[0].id);
+    }
+  }, [servers])
+
+  useEffect(() => {
+  if (channels.length > 0) {
+    setActiveChannelId(channels[0].id);
+  } else {
+    setActiveChannelId(null);
+    setMessages([]);
+  }
+  }, [channels]);
+
+  useEffect(() => {
+  if (activeChannelId) {
+    const fetchMessagesOG = async () => {
+      try {
+        const res = await api.get(`/api/channels/${activeChannelId}/messages/`);
+        setMessages(res.data);
+      } catch (err) {
+        console.error("Error fetching messages", err);
+      }
+    };
+    fetchMessagesOG();
+  }
+  }, [activeChannelId]);
+
+  const fetchChannels = async () => {
+  if (!activeServerId) return;
+  try {
+    const res = await api.get(`/api/servers/${activeServerId}/channels/`);
+    setChannels(res.data);
+  } catch (err) {
+    console.error(err);
+  }
+  };
+
+  useEffect(() => {
+    fetchChannels();
+  }, [activeServerId]);
+
+  const fetchMessages = async () => {
+    if (!activeChannelId) return;
+    const res = await api.get(`/api/channels/${activeChannelId}/messages/`);
+    setMessages(res.data);
+  };
+
   return (
     <Router>
         <Routes>
@@ -190,6 +239,10 @@ function App() {
                   suggestedGames={suggestedGames}
                   hasSteamLinked={hasSteamLinked}
                   isLoadingSuggestions={isLoadingSuggestions}
+                  activeServerId={activeServerId}
+                  activeChannelId={activeChannelId} 
+                  onSelectChannel={setActiveChannelId}
+                  onChannelCreated={fetchChannels}
                 />
               </div>
             } />
