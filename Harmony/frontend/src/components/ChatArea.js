@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import api from '../api.js';
 import EmojiPicker from 'emoji-picker-react';
 import '../../static/css/index.css';
@@ -7,6 +7,13 @@ function ChatArea({ messages, activeChannelId, onMessageSent }) {
   const [text, setText] = useState("");
   const [showPicker, setShowPicker] = useState(false);
   const pickerRef = useRef(null);
+  const messagesEndRef = useRef(null);
+  const scrollableContainerRef = useRef(null);
+  const isFirstLoad = useRef(true);
+
+  useEffect(() => {
+    isFirstLoad.current = true;
+  }, [activeChannelId]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -18,9 +25,36 @@ function ChatArea({ messages, activeChannelId, onMessageSent }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    onMessageSent();
+
+    const interval = setInterval(() => {
+      onMessageSent();
+    }, 3000); 
+
+    return () => clearInterval(interval);
+  }, [activeChannelId]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "instant" });
+  };
+
+  useEffect(() => {
+    const container = scrollableContainerRef.current;
+    if (container && messages.length > 0) {
+      const { scrollTop, scrollHeight, clientHeight } = container;
+      
+      const isAtBottom = scrollHeight - scrollTop <= clientHeight + 150;
+      
+      if (isFirstLoad.current || isAtBottom) {
+        scrollToBottom();
+        isFirstLoad.current = false;
+      }
+    }
+  }, [messages]);
+
   const onEmojiClick = (emojiData) => {
     setText(prev => prev + emojiData.emoji);
-    // Optional: setShowPicker(false); // Keep open for multiple emojis
   };
 
   const handleSendMessage = async (e) => {
@@ -49,7 +83,7 @@ function ChatArea({ messages, activeChannelId, onMessageSent }) {
   return (
     <div className='App-backround'>
       <div className="chat-wrapper">
-        <div className="message-list">
+        <div className="message-list" ref={scrollableContainerRef}>
           {messages.map((msg) => (
           <div className="discord-message">
             <img src={msg.author_avatar} alt="avatar" className="avatar" />
@@ -62,6 +96,7 @@ function ChatArea({ messages, activeChannelId, onMessageSent }) {
             </div>
           </div>
         ))}
+        <div ref={messagesEndRef} />
         </div>
         {activeChannelId && (
           <form className="input-container" onSubmit={handleSendMessage}>

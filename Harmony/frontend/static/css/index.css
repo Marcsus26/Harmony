@@ -22,7 +22,7 @@ body, html {
 
 /* RIGHT SIDEBAR */
 .right-sidebar {
-  width: 260px;
+  width: 20%;
   background-color: #2b2d31;
   border-left: 1px solid #1e1f22;
   color: white;
@@ -119,7 +119,7 @@ body, html {
 
 /* SIDEBAR STYLES */
 .sidebar {
-  width: 240px;
+  width: 20%;
   background-color: #2b2d31;
   display: flex;
   flex-direction: column;
@@ -243,7 +243,7 @@ body, html {
 }
 
 .chat-wrapper {
-  width: 40%;
+  width: 60%;
   margin: 0 auto;
   background-color: #313338;
   height: 80vh;
@@ -269,8 +269,11 @@ body, html {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
   padding-bottom: 10px;
+}
+
+.message-list > :first-child {
+  margin-top: auto !important;
 }
 
 .discord-message {
