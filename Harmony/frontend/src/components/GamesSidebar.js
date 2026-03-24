@@ -1,11 +1,24 @@
 import React from 'react';
 import '../../static/css/index.css';
+import api from '../api.js';
 
-function GamesSidebar({ suggestedGames, hasSteamLinked, isLoadingSuggestions, onSelectGame }) {
+function GamesSidebar({ suggestedGames, hasSteamLinked, isLoadingSuggestions, onSelectGame, setSuggestedGames }) {
+
+    const handleRefuse = async (e, gameId) => {
+    e.stopPropagation();
+    
+    setSuggestedGames(prev => prev.filter(g => g.id !== gameId));
+
+    try {
+      await api.post('/api/recommendations/refuse/', { game_id: String(gameId) });
+    } catch (err) {
+      console.error("Failed to save refusal", err);
+    }
+  };
   return (
     <div className="games-sidebar">
       <div className="panel">
-        <p className="sidebar-label">RECOMMENDED FOR YOU</p>
+        <p className="sidebar-label">BASED ON THE GAMES YOU PLAY</p>
         
         {isLoadingSuggestions && (
           <div className="channel-item">Loading recommendations...</div>
@@ -24,9 +37,15 @@ function GamesSidebar({ suggestedGames, hasSteamLinked, isLoadingSuggestions, on
             <div key={game.id || game.title} className="game-card" onClick={() => onSelectGame(game.id)}>
               <img src={game.img} alt={game.title} />
               <div className="game-info">
-                <span className="game-title">{game.title}</span>
+                <div className="game-title">{game.title}</div>
                 <span className="game-status">{game.genre}</span>
               </div>
+              <button 
+                className="refuse-btn" 
+                onClick={(e) => handleRefuse(e, game.id)}
+                title="Not interested">
+                x
+            </button>
             </div>
           ))}
         </div>

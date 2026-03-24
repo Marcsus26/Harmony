@@ -32,6 +32,13 @@ class Message(models.Model):
         ordering = ['timestamp']
 
 class FriendRequest(models.Model):
+    STATUS_CHOICES = (
+        (1, 'Pending'),
+        (2, 'Accepted'),
+        (3, 'Rejected'),
+    )
+    
+    status = models.IntegerField(choices=STATUS_CHOICES, default=1)
     from_user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='sent_requests'
     )
@@ -46,3 +53,12 @@ class FriendRequest(models.Model):
 
     def __str__(self):
         return f"{self.from_user} to {self.to_user}"
+
+class RefusedGame(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="refused_games")
+    # Use CharField for game_id to avoid the JavaScript "Large Integer" rounding bug!
+    game_id = models.CharField(max_length=255) 
+    refused_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'game_id')

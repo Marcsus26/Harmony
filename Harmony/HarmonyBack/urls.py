@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from .views import UserView, RegisterView, CurrentUserView, ProfileUpdateView, GameSuggestionsView, UserServersView, ServerCreateView, ServerChannelsView, ChannelMessagesView, ChannelCreateView, MessageCreateView, ServerUpdateMembersView, UserServersView, ServerCreateView, ServerChannelsView, ChannelMessagesView, ChannelCreateView, MessageCreateView, ServerUpdateMembersView, ServerDeleteView, ServerLeaveView
+from .views import UserView, RegisterView, CurrentUserView, ProfileUpdateView, GameSuggestionsView, UserServersView, ServerCreateView, ServerChannelsView, ChannelMessagesView, ChannelCreateView, MessageCreateView, ServerUpdateMembersView, UserServersView, ServerCreateView, ServerChannelsView, ChannelMessagesView, ChannelCreateView, MessageCreateView, ServerUpdateMembersView, ServerDeleteView, ServerLeaveView, RefuseGameView
 
 urlpatterns = [
     path('', UserView.as_view()),
@@ -26,4 +26,5 @@ urlpatterns = [
     path('servers/<int:pk>/update-members/', ServerUpdateMembersView.as_view()),
     path('servers/<int:pk>/delete/', ServerDeleteView.as_view()),
     path('servers/<int:pk>/leave/', ServerLeaveView.as_view()),
+    path('recommendations/refuse/', RefuseGameView.as_view()),
 ]

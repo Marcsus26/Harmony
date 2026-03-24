@@ -2,22 +2,25 @@ import React from 'react';
 import '../../static/css/index.css';
 
 function SteamView({ gameId, onClose }) {
-  const steamWidgetUrl = `https://store.steampowered.com/widget/${gameId}/`;
+  const steamWidgetUrl = gameId ? `https://store.steampowered.com/widget/${gameId}/` : "";
 
-  return (
-    <div className="steam-view-container">
+    return (
+    <div className={`steam-view-container ${gameId ? 'visible' : ''}`}>
       <div className="steam-header">
+        <span>STEAM STORE PREVIEW</span>
         <button className="close-steam-btn" onClick={onClose}>
-          ✕ Close Store Page
+          ✕ Close
         </button>
       </div>
-      <iframe 
-        src={steamWidgetUrl} 
-        frameBorder="0" 
-        width="100%" 
-        height="100%"
-        title="Steam Store"
-      ></iframe>
+      {gameId && (
+        <iframe 
+          src={steamWidgetUrl} 
+          frameBorder="0" 
+          width="100%" 
+          height="100%"
+          title="Steam Store"
+        ></iframe>
+      )}
     </div>
   );
 }

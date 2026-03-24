@@ -184,22 +184,22 @@ function App() {
                 currentUser={user}/>
                 <GamesSidebar 
                   suggestedGames={suggestedGames}
+                  setSuggestedGames={setSuggestedGames}
                   hasSteamLinked={hasSteamLinked}
                   isLoadingSuggestions={isLoadingSuggestions}
                   onSelectGame={(id) => setActiveSteamGameId(id)}
                 />
-                {activeSteamGameId ? (
+
                 <SteamView 
                   gameId={activeSteamGameId} 
                   onClose={() => setActiveSteamGameId(null)} 
                 />
-                ) :
-                (<main className="main-content">
+                <main className="main-content">
                   <UserAccount setAuth={setIsAuthenticated} />
                   <ChatArea messages={messages}
                   activeChannelId={activeChannelId} 
                   onMessageSent={fetchMessages}/>
-                </main>)}
+                </main>
 
                 <RightSidebar channels={channels} 
                   activeServerId={activeServerId}

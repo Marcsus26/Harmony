@@ -4,7 +4,7 @@ from pathlib import Path
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny
 from .serializers import UserSerializer, RegisterSerializer, ProfileSerializer, ServerSerializer, ServerCreateSerializer, ChannelSerializer, MessageSerializer, ServerSerializer, ServerCreateSerializer, ChannelSerializer, MessageSerializer
-from .models import User, Server, Channel, Message, Server, Channel, Message
+from .models import User, Server, Channel, Message, Server, Channel, Message, RefusedGame
 from .suggestion_games import get_top_5_recommendations
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -128,11 +128,15 @@ class GameSuggestionsView(APIView):
                 {"detail": "No Steam ID linked to this account.", "results": []},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        
+        rejected_strings = RefusedGame.objects.filter(user=request.user).values_list('game_id', flat=True)
+        
+        rejected_ids = [int(gid) for gid in rejected_strings]
 
         csv_path = Path(__file__).resolve().parent / "steamspy_details_cleaned.csv"
 
         try:
-            recommendations = get_top_5_recommendations(steam_id, csv_path)
+            recommendations = get_top_5_recommendations(steam_id, csv_path, rejected_appids=rejected_ids)
             payload = recommendations.reset_index().rename(columns={"index": "appid"}).to_dict(orient='records')
             return Response({"results": payload}, status=status.HTTP_200_OK)
         except Exception as exc:
@@ -244,3 +248,14 @@ class ServerLeaveView(APIView):
             
         except Server.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
+        
+class RefuseGameView(APIView):
+    def post(self, request):
+        game_id = request.data.get('game_id')
+        if not game_id:
+            return Response({"error": "game_id is required"}, status=400)
+            
+        # Create the refusal record
+        RefusedGame.objects.get_or_create(user=request.user, game_id=str(game_id))
+        
+        return Response({"status": "Game dismissed"}, status=200)
