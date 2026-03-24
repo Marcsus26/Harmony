@@ -13,6 +13,8 @@ import ProtectedRoute from './ProtectedRoute.jsx';
 import Register from "./Register.js";
 import MyProfile from "./MyProfile.js";
 import api from "../api.js";
+import GamesSidebar from "./GamesSidebar.js";
+import SteamView from "./SteamView.js";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -21,6 +23,7 @@ function App() {
   const [channels, setChannels] = useState([]);
   const [activeChannelId, setActiveChannelId] = useState(null);
   const [messages, setMessages] = useState([]);
+  const [activeSteamGameId, setActiveSteamGameId] = useState(null);
 
   const friends = [
     { id: 1, name: "Nelly", status: "online", avatar: logo },
@@ -140,6 +143,7 @@ function App() {
           img: game.appid
             ? `https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/header.jpg`
             : logo,
+          genre: game.genre,
         }));
         setSuggestedGames(games);
       } catch (error) {
@@ -169,7 +173,6 @@ function App() {
     <Router>
         <Routes>
         <Route path="/login" element={<Login setAuth={setIsAuthenticated}/>} />
-          {/* Protected Routes */}
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={
               <div className="app-container">
@@ -179,13 +182,24 @@ function App() {
                 activeServerId={activeServerId} 
                 onSelectServer={setActiveServerId} 
                 currentUser={user}/>
-              
-                <main className="main-content">
+                <GamesSidebar 
+                  suggestedGames={suggestedGames}
+                  hasSteamLinked={hasSteamLinked}
+                  isLoadingSuggestions={isLoadingSuggestions}
+                  onSelectGame={(id) => setActiveSteamGameId(id)}
+                />
+                {activeSteamGameId ? (
+                <SteamView 
+                  gameId={activeSteamGameId} 
+                  onClose={() => setActiveSteamGameId(null)} 
+                />
+                ) :
+                (<main className="main-content">
                   <UserAccount setAuth={setIsAuthenticated} />
                   <ChatArea messages={messages}
                   activeChannelId={activeChannelId} 
                   onMessageSent={fetchMessages}/>
-                </main>
+                </main>)}
 
                 <RightSidebar channels={channels} 
                   activeServerId={activeServerId}

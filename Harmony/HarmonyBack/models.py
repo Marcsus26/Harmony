@@ -3,7 +3,7 @@ from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 
 class User(AbstractUser):
-    steam_id = models.BigIntegerField(unique=True, null=True, blank=True)
+    steam_id = models.CharField(max_length=40, unique=True, null=True, blank=True)
     friends = models.ManyToManyField("self", symmetrical=True, blank=True)
 
 class Profile(models.Model):

@@ -133,8 +133,8 @@ def get_top_5_recommendations(steam_id, steam_games_csv, rejected_appids=None):
 
     candidates['match_score'] = candidates.apply(calculate_composite_score, axis=1)
 
-    top_5 = candidates.sort_values(by='match_score', ascending=False).head(5).copy()
-    top_5['positive'] = top_5['positive'].fillna(0).astype(int)
-    top_5['match_score'] = top_5['match_score'].round(2)
+    top_50 = candidates.sort_values(by='match_score', ascending=False).head(50).copy()
+    top_50['positive'] = top_50['positive'].fillna(0).astype(int)
+    top_50['match_score'] = top_50['match_score'].round(2)
 
-    return top_5[['name', 'genre', 'positive', 'match_score']]
+    return top_50[['name', 'genre', 'positive', 'match_score']]

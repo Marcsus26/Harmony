@@ -26,7 +26,7 @@ function SteamIntegration({ onSteamLinked }) {
     setIsError(false);
     try {
       // We only send the steam_id field
-      await api.patch('/api/auth/me/', { steam_id: steamId });
+      await api.patch('/api/auth/me/', { steam_id: String(steamId) });
       if (typeof onSteamLinked === 'function') {
         onSteamLinked();
       }
