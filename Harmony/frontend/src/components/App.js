@@ -145,6 +145,7 @@ function App() {
             : logo,
           genre: game.genre,
         }));
+        games.sort(() => Math.random() - 0.5);
         setSuggestedGames(games);
       } catch (error) {
         console.error('Failed to fetch game suggestions', error);
