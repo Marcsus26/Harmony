@@ -13,6 +13,7 @@ from rest_framework.permissions import IsAuthenticated
 import requests
 from django.contrib.auth import get_user_model
 from django.db import transaction
+from django.utils import timezone
 
 class CurrentUserView(APIView):
     permission_classes = [IsAuthenticated] # Only logged-in users allowed
@@ -49,41 +50,6 @@ class ProfileUpdateView(generics.RetrieveUpdateAPIView):
         # This ensures a user can only edit THEIR own profile
         return self.request.user.profile
     
-class UserServersView(generics.ListAPIView):
-    serializer_class = ServerSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        return Server.objects.filter(users=self.request.user)
-    
-class ServerCreateView(generics.CreateAPIView):
-    serializer_class = ServerCreateSerializer
-    permission_classes = [IsAuthenticated]
-
-    def perform_create(self, serializer):
-        server = serializer.save(owner=self.request.user)
-        server.users.add(self.request.user)
-        Channel.objects.create(
-            name="general", 
-            server=server
-        )
-
-class ServerChannelsView(generics.ListAPIView):
-    serializer_class = ChannelSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        # Grab the server ID from the URL
-        server_id = self.kwargs['server_id']
-        return Channel.objects.filter(server_id=server_id)
-    
-class ChannelMessagesView(generics.ListAPIView):
-    serializer_class = MessageSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        return Message.objects.filter(channel_id=self.kwargs['channel_id'])
-    
 class ChannelCreateView(generics.CreateAPIView):
     serializer_class = ChannelSerializer
     permission_classes = [IsAuthenticated]
@@ -92,34 +58,6 @@ class ChannelCreateView(generics.CreateAPIView):
         # Grab the server_id from the URL and link the channel to it
         server = Server.objects.get(id=self.kwargs['server_id'])
         serializer.save(server=server)
-
-class MessageCreateView(generics.CreateAPIView):
-    serializer_class = MessageSerializer
-    permission_classes = [IsAuthenticated]
-
-    def perform_create(self, serializer):
-        channel = Channel.objects.get(id=self.kwargs['channel_id'])
-        serializer.save(author=self.request.user, channel=channel)
-
-class ServerUpdateMembersView(generics.UpdateAPIView):
-    queryset = Server.objects.all()
-    serializer_class = ServerCreateSerializer
-    permission_classes = [IsAuthenticated]
-
-    def patch(self, request, *args, **kwargs):
-        server = self.get_object()
-        
-        if server.owner != request.user:
-            return Response({"detail": "Not authorized"}, status=status.HTTP_403_FORBIDDEN)
-        user_ids = request.data.get('users', [])
-        
-        owner_id = request.user.id
-        if owner_id not in user_ids:
-            user_ids.append(owner_id)
-
-        request.data['users'] = user_ids
-
-        return self.partial_update(request, *args, **kwargs)
 
 
 class GameSuggestionsView(APIView):
@@ -163,6 +101,8 @@ class ServerCreateView(generics.CreateAPIView):
     def perform_create(self, serializer):
         server = serializer.save(owner=self.request.user)
         server.users.add(self.request.user)
+        self.request.user.last_seen = timezone.now()
+        self.request.user.save(update_fields=['last_seen'])
         Channel.objects.create(
             name="general", 
             server=server
@@ -190,6 +130,8 @@ class ChannelCreateView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         # Grab the server_id from the URL and link the channel to it
+        self.request.user.last_seen = timezone.now()
+        self.request.user.save(update_fields=['last_seen'])
         server = Server.objects.get(id=self.kwargs['server_id'])
         serializer.save(server=server)
 
@@ -198,6 +140,8 @@ class MessageCreateView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
+        self.request.user.last_seen = timezone.now()
+        self.request.user.save(update_fields=['last_seen'])
         channel = Channel.objects.get(id=self.kwargs['channel_id'])
         serializer.save(author=self.request.user, channel=channel)
 
@@ -208,6 +152,8 @@ class ServerUpdateMembersView(generics.UpdateAPIView):
 
     def patch(self, request, *args, **kwargs):
         server = self.get_object()
+        request.user.last_seen = timezone.now()
+        request.user.save(update_fields=['last_seen'])
         
         if server.owner != request.user:
             return Response({"detail": "Not authorized"}, status=status.HTTP_403_FORBIDDEN)
@@ -236,6 +182,8 @@ class ServerLeaveView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
+        request.user.last_seen = timezone.now()
+        request.user.save(update_fields=['last_seen'])
         try:
             server = Server.objects.get(pk=pk)
             
@@ -256,6 +204,8 @@ class ServerLeaveView(APIView):
 class RefuseGameView(APIView):
     def post(self, request):
         game_id = request.data.get('game_id')
+        request.user.last_seen = timezone.now()
+        request.user.save(update_fields=['last_seen'])
         if not game_id:
             return Response({"error": "game_id is required"}, status=400)
             
@@ -270,6 +220,8 @@ class SteamGameDetailsView(APIView):
     def get(self, request, appid):
         appid_str = str(appid)
         url = f"https://store.steampowered.com/api/appdetails?appids={appid_str}"
+        request.user.last_seen = timezone.now()
+        request.user.save(update_fields=['last_seen'])
         
         try:
             response = requests.get(url, timeout=5)
@@ -296,6 +248,8 @@ class UserStatsView(APIView):
 
     def get(self, request):
         steam_id = request.user.steam_id
+        request.user.last_seen = timezone.now()
+        request.user.save(update_fields=['last_seen'])
         if not steam_id:
             return Response({"detail": "Steam ID manquant"}, status=400)
 
@@ -328,6 +282,8 @@ class SendFriendRequestView(APIView):
 
     def post(self, request):
         target_username = request.data.get('username')
+        request.user.last_seen = timezone.now()
+        request.user.save(update_fields=['last_seen'])
         
         if not target_username:
             return Response({"error": "Username is required"}, status=status.HTTP_400_BAD_REQUEST)
@@ -359,6 +315,8 @@ class PendingRequestsListView(APIView):
     def get(self, request):
         # We only want requests sent TO the current user that are still 'Pending' (status=1)
         pending = FriendRequest.objects.filter(to_user=request.user, status=1)
+        request.user.last_seen = timezone.now()
+        request.user.save(update_fields=['last_seen'])
         
         # Simple data return (you could also use a Serializer here)
         data = [{
@@ -374,6 +332,8 @@ class RespondToRequestView(APIView):
 
     def post(self, request, request_id):
         action = request.data.get('action') 
+        request.user.last_seen = timezone.now()
+        request.user.save(update_fields=['last_seen'])
         
         try:
             friend_request = FriendRequest.objects.get(id=request_id, to_user=request.user)
@@ -400,6 +360,8 @@ class FriendsListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        request.user.last_seen = timezone.now()
+        request.user.save(update_fields=['last_seen'])
         friends = request.user.friends.all()
         data = [{
             "id": friend.id,

@@ -31,6 +31,7 @@ function RightSidebar({ channels, activeChannelId, onSelectChannel, onChannelCre
       setShowServerModal(false);
       onSelectServer(null);
       onServerCreated();
+      onSelectChannel(null);
     } catch (err) {
       alert("Error leaving server");
     }
@@ -106,6 +107,7 @@ function RightSidebar({ channels, activeChannelId, onSelectChannel, onChannelCre
     if (onSelectServer) onSelectServer(null);
     
     if (onServerCreated) onServerCreated();
+    onSelectChannel(null);
   } catch (err) {
     console.error(err);
     alert("Failed to delete server. Only the owner can delete a server.");

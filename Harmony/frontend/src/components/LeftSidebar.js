@@ -39,19 +39,9 @@ function FriendItem({ name, status, avatar }) {
         <div className="sidebar-item">
             <div className="avatar-wrapper">
             <img src={avatar} className="sidebar-avatar" alt={name} />
-            <div className={`status-dot ${status}`}></div>
+            <div className={`status-dot ${status ? 'online' : 'offline'}`}></div>
             </div>
             <span>{name}</span>
-        </div>
-    )
-};
-
-// A single Server row in the panel
-function ServerItem({ icon, name }) {
-    return (
-        <div className="server-item">
-        <div className="server-icon">{icon}</div>
-        <span>{name}</span>
         </div>
     )
 };
@@ -65,7 +55,6 @@ function AddFriendModal({ isOpen, onClose }) {
       const response = await api.post('/api/friends/send/', { username });
       setMessage({ text: response.data.message, type: 'success' });
       setUsername('');
-      // Optional: Close modal after a delay
       setTimeout(onClose, 1500);
     } catch (err) {
       const errorMsg = err.response?.data?.error || "Something went wrong";

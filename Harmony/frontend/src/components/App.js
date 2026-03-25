@@ -26,6 +26,11 @@ function App() {
   const [activeSteamGameId, setActiveSteamGameId] = useState(null);
   const [userStats, setUserStats] = useState([]);
   const [friends, setFriends] = useState([]);
+  const [suggestedGames, setSuggestedGames] = useState([]);
+  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('access_token'));
+  const [hasSteamLinked, setHasSteamLinked] = useState(false);
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+  const [suggestionsRefreshKey, setSuggestionsRefreshKey] = useState(0);
 
   useEffect(() => {
     const fetchFriends = async () => {
@@ -37,10 +42,11 @@ function App() {
       }
     };
     fetchFriends();
-  }, []);
-
-  const [suggestedGames, setSuggestedGames] = useState([]);
-  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('access_token'));
+    const interval = setInterval(() => {
+      fetchFriends();
+    }, 30000); 
+    return () => clearInterval(interval);
+  }, [isAuthenticated]);
 
   const loadServers = async () => {
     try {
@@ -54,7 +60,7 @@ function App() {
 
   useEffect(() => {
     loadServers();
-  }, []);
+  }, [isAuthenticated]);
 
   useEffect(() => {
       const fetchStats = async () => {
@@ -81,7 +87,7 @@ function App() {
       };
       fetchChannels();
     }
-  }, [activeServerId]);
+  }, [activeServerId, isAuthenticated]);
 
   useEffect(() => {
     if (servers.length > 0) {
@@ -96,7 +102,7 @@ function App() {
     setActiveChannelId(null);
     setMessages([]);
   }
-  }, [channels]);
+  }, [channels, isAuthenticated]);
 
   useEffect(() => {
   if (activeChannelId) {
@@ -110,7 +116,7 @@ function App() {
     };
     fetchMessagesOG();
   }
-  }, [activeChannelId]);
+  }, [activeChannelId, isAuthenticated]);
 
   const fetchChannels = async () => {
   if (!activeServerId) return;
@@ -124,17 +130,13 @@ function App() {
 
   useEffect(() => {
     fetchChannels();
-  }, [activeServerId]);
+  }, [activeServerId, isAuthenticated]);
 
   const fetchMessages = async () => {
     if (!activeChannelId) return;
     const res = await api.get(`/api/channels/${activeChannelId}/messages/`);
     setMessages(res.data);
   };
-
-  const [hasSteamLinked, setHasSteamLinked] = useState(false);
-  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
-  const [suggestionsRefreshKey, setSuggestionsRefreshKey] = useState(0);
 
   useEffect(() => {
     const fetchSuggestions = async () => {
@@ -176,7 +178,7 @@ function App() {
     };
 
     fetchSuggestions();
-  }, [isAuthenticated, suggestionsRefreshKey]);
+  }, [isAuthenticated, suggestionsRefreshKey, isAuthenticated]);
 
   const handleSteamLinked = () => {
     setSuggestionsRefreshKey((prev) => prev + 1);
@@ -188,7 +190,7 @@ function App() {
       setUser(me.data);
      };
      fetchCurrentUser();
-  }, [])
+  }, [isAuthenticated])
 
   return (
     <Router>
