@@ -24,6 +24,7 @@ function App() {
   const [activeChannelId, setActiveChannelId] = useState(null);
   const [messages, setMessages] = useState([]);
   const [activeSteamGameId, setActiveSteamGameId] = useState(null);
+  const [userStats, setUserStats] = useState([]);
 
   const friends = [
     { id: 1, name: "Nelly", status: "online", avatar: logo },
@@ -48,6 +49,19 @@ function App() {
   useEffect(() => {
     loadServers();
   }, []);
+
+  useEffect(() => {
+      const fetchStats = async () => {
+          try {
+              const response = await api.get('/api/recommendations/stats/'); // Ton endpoint Django
+              setUserStats(response.data);
+          } catch (error) {
+              console.error("Erreur stats:", error);
+          }
+      };
+      if (isAuthenticated) fetchStats();
+  }, [isAuthenticated]);
+
 
   useEffect(() => {
     if (activeServerId) {
@@ -182,7 +196,8 @@ function App() {
                 onServerCreated={loadServers} 
                 activeServerId={activeServerId} 
                 onSelectServer={setActiveServerId} 
-                currentUser={user}/>
+                currentUser={user}
+                userStats={userStats}/>
                 <GamesSidebar 
                   suggestedGames={suggestedGames}
                   setSuggestedGames={setSuggestedGames}
@@ -210,6 +225,7 @@ function App() {
                   suggestedGames={suggestedGames}
                   hasSteamLinked={hasSteamLinked}
                   isLoadingSuggestions={isLoadingSuggestions}
+                  userStats={userStats}
                 />
               </div>
             } />

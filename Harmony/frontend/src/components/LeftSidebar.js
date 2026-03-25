@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import '../../static/css/index.css';
 import logo from "../../static/images/logo.svg";
 import api from '../api.js';
+import UserStatsChart from './UserStatChart.js';
 
 // A simple divider component for the sidebar
 function SidebarDivider({ label }) {
@@ -14,7 +15,7 @@ function SidebarDivider({ label }) {
     )
 };
 
-// Suggestion Item: Shows the game that "interests" the user
+// Suggestion Item: Shows the users that "interest" the user
 function SuggestedFriendItem({ name, game, avatar }) {
     return (
         <div className="sidebar-item suggestion">
@@ -54,7 +55,7 @@ function ServerItem({ icon, name }) {
     )
 };
 
-function Sidebar({ friends, servers, onServerCreated, activeServerId, onSelectServer, currentUser }) {
+function Sidebar({ friends, servers, onServerCreated, activeServerId, onSelectServer, currentUser, userStats }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [name, setName] = useState('');
@@ -184,7 +185,14 @@ function Sidebar({ friends, servers, onServerCreated, activeServerId, onSelectSe
         <div className="suggestions-section">
           {suggestions.map(s => <SuggestedFriendItem key={s.id} {...s} />)}
         </div>
+
+        {/* NOUVELLE SECTION : Statistiques Hexagonales */}
+            <div className="panel stats-panel">
+                <p className="sidebar-label">YOUR GAMING PROFILE</p>
+                <UserStatsChart stats={userStats} />
+            </div>
       </div>
+
       <div className={`server-panel ${isExpanded ? 'expanded' : ''}`}>
         <div className="panel-header">
           <div onClick={() => setIsExpanded(!isExpanded)} style={{cursor: 'pointer'}}>

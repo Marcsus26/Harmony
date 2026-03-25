@@ -5,7 +5,7 @@ from rest_framework import generics, status
 from rest_framework.permissions import AllowAny
 from .serializers import UserSerializer, RegisterSerializer, ProfileSerializer, ServerSerializer, ServerCreateSerializer, ChannelSerializer, MessageSerializer, ServerSerializer, ServerCreateSerializer, ChannelSerializer, MessageSerializer
 from .models import User, Server, Channel, Message, Server, Channel, Message, RefusedGame
-from .suggestion_games import get_top_5_recommendations
+from .suggestion_games import get_top_5_recommendations, create_user_pref_dict 
 from .suggestion_games_KNN import get_knn_recommendations
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -260,3 +260,34 @@ class RefuseGameView(APIView):
         RefusedGame.objects.get_or_create(user=request.user, game_id=str(game_id))
         
         return Response({"status": "Game dismissed"}, status=200)
+
+class UserStatsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        steam_id = request.user.steam_id
+        if not steam_id:
+            return Response({"detail": "Steam ID manquant"}, status=400)
+
+        csv_path = Path(__file__).resolve().parent / "steamspy_details_cleaned.csv"
+
+        try:
+            # 1. Récupère le dictionnaire des préférences (ex: {'Action': 45.2, 'RPG': 30.1...})
+            prefs = create_user_pref_dict(steam_id, csv_path)
+            
+            if not prefs:
+                return Response([], status=200)
+
+            # 2. Formater pour Recharts (Hexagone = 6 genres max)
+            # On prend les 6 premiers et on normalise un peu les noms si besoin
+            radar_data = []
+            for genre, score in list(prefs.items())[:6]:
+                radar_data.append({
+                    "subject": genre,      # Le nom affiché sur la pointe de l'hexagone
+                    "A": round(score, 1),  # La valeur (distance par rapport au centre)
+                    "fullMark": 100        # Référence optionnelle
+                })
+
+            return Response(radar_data, status=200)
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
