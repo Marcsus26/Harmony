@@ -840,3 +840,38 @@ body, html {
   background: #da373c; /* Discord Red */
   color: white;
 }
+
+.steam-content-scroll {
+  flex: 1;
+  overflow-y: auto; /* Allows scrolling if the video + widget are tall */
+  padding: 20px;
+  background-color: #171a21; /* Steam Deep Blue */
+}
+
+.trailer-wrapper {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+  margin-bottom: 20px;
+  background: black;
+}
+
+.widget-wrapper {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.no-trailer {
+  color: #8f98a0;
+  text-align: center;
+  padding: 40px;
+  font-style: italic;
+}
+
+.game-trailer-video {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid #3d4450;
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
