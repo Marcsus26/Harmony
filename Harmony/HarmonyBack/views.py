@@ -10,6 +10,7 @@ from .suggestion_games_KNN import get_knn_recommendations
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+import requests
 
 class CurrentUserView(APIView):
     permission_classes = [IsAuthenticated] # Only logged-in users allowed
@@ -260,3 +261,30 @@ class RefuseGameView(APIView):
         RefusedGame.objects.get_or_create(user=request.user, game_id=str(game_id))
         
         return Response({"status": "Game dismissed"}, status=200)
+
+class SteamGameDetailsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, appid):
+        appid_str = str(appid)
+        url = f"https://store.steampowered.com/api/appdetails?appids={appid_str}"
+        
+        try:
+            response = requests.get(url, timeout=5)
+            data = response.json()
+
+            if data and data.get(appid_str, {}).get('success'):
+                game_info = data[appid_str]['data']
+                movies = game_info.get('movies', [])
+                
+                # We specifically target the HLS stream from your JSON
+                trailer_url = movies[0].get('hls_h264') if movies else None
+                
+                return Response({
+                    "name": game_info.get('name'),
+                    "trailer_url": trailer_url, # This will be the .m3u8 link
+                }, status=status.HTTP_200_OK)
+            
+            return Response({"error": "Game not found"}, status=404)
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)

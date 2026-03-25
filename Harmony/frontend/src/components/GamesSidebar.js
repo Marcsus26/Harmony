@@ -38,7 +38,7 @@ function GamesSidebar({ suggestedGames, hasSteamLinked, isLoadingSuggestions, on
               <img src={game.img} alt={game.title} />
               <div className="game-info">
                 <div className="game-title">{game.title}</div>
-                <span className="game-status">{game.genre}</span>
+                <div className="game-status">{game.genre}</div>
               </div>
               <button 
                 className="refuse-btn" 
