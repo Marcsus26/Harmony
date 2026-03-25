@@ -6,6 +6,7 @@ from rest_framework.permissions import AllowAny
 from .serializers import UserSerializer, RegisterSerializer, ProfileSerializer, ServerSerializer, ServerCreateSerializer, ChannelSerializer, MessageSerializer, ServerSerializer, ServerCreateSerializer, ChannelSerializer, MessageSerializer
 from .models import User, Server, Channel, Message, Server, Channel, Message, RefusedGame
 from .suggestion_games import get_top_5_recommendations
+from .suggestion_games_KNN import get_knn_recommendations
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -136,7 +137,7 @@ class GameSuggestionsView(APIView):
         csv_path = Path(__file__).resolve().parent / "steamspy_details_cleaned.csv"
 
         try:
-            recommendations = get_top_5_recommendations(steam_id, csv_path, rejected_appids=rejected_ids)
+            recommendations = get_knn_recommendations(steam_id, csv_path, rejected_appids=rejected_ids)
             payload = recommendations.reset_index().rename(columns={"index": "appid"}).to_dict(orient='records')
             return Response({"results": payload}, status=status.HTTP_200_OK)
         except Exception as exc:
