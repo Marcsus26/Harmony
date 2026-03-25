@@ -25,13 +25,19 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [activeSteamGameId, setActiveSteamGameId] = useState(null);
   const [userStats, setUserStats] = useState([]);
+  const [friends, setFriends] = useState([]);
 
-  const friends = [
-    { id: 1, name: "Nelly", status: "online", avatar: logo },
-    { id: 2, name: "User123", status: "offline", avatar: logo },
-    { id: 3, name: "CodingWizard", status: "online", avatar: logo },
-    { id: 4, name: "Gamer99", status: "online", avatar: logo },
-  ];
+  useEffect(() => {
+    const fetchFriends = async () => {
+      try {
+        const response = await api.get('/api/friends/list/');
+        setFriends(response.data);
+      } catch (err) {
+        console.error("Could not fetch friends", err);
+      }
+    };
+    fetchFriends();
+  }, []);
 
   const [suggestedGames, setSuggestedGames] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('access_token'));

@@ -1,10 +1,20 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
+from django.utils import timezone
+from datetime import timedelta
 
 class User(AbstractUser):
     steam_id = models.CharField(max_length=40, unique=True, null=True, blank=True)
     friends = models.ManyToManyField("self", symmetrical=True, blank=True)
+    last_seen = models.DateTimeField(null=True, blank=True)
+
+    @property
+    def is_online(self):
+        if self.last_seen:
+            # If the user was active in the last 5 minutes, consider them online
+            return self.last_seen > timezone.now() - timedelta(minutes=5)
+        return False
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')

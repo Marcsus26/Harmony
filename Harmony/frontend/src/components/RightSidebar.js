@@ -220,7 +220,7 @@ function RightSidebar({ channels, activeChannelId, onSelectChannel, onChannelCre
                 <div className="member-list-scroll">
                   {friends.map(f => (
                     <div key={f.id} className="member-select-item">
-                      <span>{f.name}</span>
+                      <span>{f.username}</span>
                       <input 
                         type="checkbox" 
                         checked={selectedFriends.includes(f.id)} 
@@ -245,7 +245,7 @@ function RightSidebar({ channels, activeChannelId, onSelectChannel, onChannelCre
                   )}
                 </div>
                 <div className="right-actions">
-                  <button type="button" className="cancel-btn" onClick={() => setShowModal(false)}>Back</button>
+                  <button type="button" className="cancel-btn" onClick={() => setShowServerModal(false)}>Back</button>
                   {isOwner && <button type="submit" className="save-btn">{isEditing ? 'Save Changes' : 'Create'}</button>}
                 </div>
               </div>

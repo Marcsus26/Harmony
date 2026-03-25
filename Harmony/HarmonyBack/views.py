@@ -4,13 +4,15 @@ from pathlib import Path
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny
 from .serializers import UserSerializer, RegisterSerializer, ProfileSerializer, ServerSerializer, ServerCreateSerializer, ChannelSerializer, MessageSerializer, ServerSerializer, ServerCreateSerializer, ChannelSerializer, MessageSerializer
-from .models import User, Server, Channel, Message, Server, Channel, Message, RefusedGame
+from .models import User, Server, Channel, Message, Server, Channel, Message, RefusedGame, FriendRequest
 from .suggestion_games import get_top_5_recommendations, create_user_pref_dict 
 from .suggestion_games_KNN import get_knn_recommendations
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 import requests
+from django.contrib.auth import get_user_model
+from django.db import transaction
 
 class CurrentUserView(APIView):
     permission_classes = [IsAuthenticated] # Only logged-in users allowed
@@ -319,3 +321,93 @@ class UserStatsView(APIView):
             return Response(radar_data, status=200)
         except Exception as e:
             return Response({"error": str(e)}, status=500)
+
+class SendFriendRequestView(APIView):
+    permission_classes = [IsAuthenticated]
+    User = get_user_model()
+
+    def post(self, request):
+        target_username = request.data.get('username')
+        
+        if not target_username:
+            return Response({"error": "Username is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            to_user = User.objects.get(username=target_username)
+        except User.DoesNotExist:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        if to_user == request.user:
+            return Response({"error": "You cannot add yourself, you're already your own best friend!"}, 
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        # Create the request
+        obj, created = FriendRequest.objects.get_or_create(
+            from_user=request.user,
+            to_user=to_user
+        )
+
+        if not created:
+            return Response({"error": "Friend request already sent or exists"}, 
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({"message": f"Friend request sent to {target_username}"}, status=status.HTTP_201_CREATED)
+    
+class PendingRequestsListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        # We only want requests sent TO the current user that are still 'Pending' (status=1)
+        pending = FriendRequest.objects.filter(to_user=request.user, status=1)
+        
+        # Simple data return (you could also use a Serializer here)
+        data = [{
+            "id": req.id,
+            "from_user": req.from_user.username,
+            "timestamp": req.timestamp
+        } for req in pending]
+        
+        return Response(data, status=status.HTTP_200_OK)
+
+class RespondToRequestView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, request_id):
+        action = request.data.get('action') 
+        
+        try:
+            friend_request = FriendRequest.objects.get(id=request_id, to_user=request.user)
+        except FriendRequest.DoesNotExist:
+            return Response({"error": "Request not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        if action == 'accept':
+            with transaction.atomic():
+                friend_request.status = 2 # Accepted
+                friend_request.save()
+                
+                request.user.friends.add(friend_request.from_user)
+            
+            return Response({"message": "Friend added successfully!"}, status=status.HTTP_200_OK)
+            
+        elif action == 'reject':
+            friend_request.status = 3 # Rejected
+            friend_request.save()
+            return Response({"message": "Request declined."})
+            
+        return Response({"error": "Invalid action"}, status=status.HTTP_400_BAD_REQUEST)
+    
+class FriendsListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        friends = request.user.friends.all()
+        data = [{
+            "id": friend.id,
+            "username": friend.username,
+            "steam_id": friend.steam_id,
+            "avatar": friend.profile.profile_pic_url,
+            "is_online": friend.is_online,
+            # You can add 'is_online' logic here later
+        } for friend in friends]
+        
+        return Response(data)

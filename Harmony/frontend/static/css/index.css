@@ -859,3 +859,133 @@ body, html {
   border: 1px solid #3d4450;
   box-shadow: 0 0 20px rgba(0,0,0,0.5);
 }
+
+/* Sidebar Trigger Button */
+.add-friend-trigger {
+  width: 100%;
+  padding: 10px;
+  background: #2a2d32;
+  border: 1px dashed #4f545c;
+  color: #b9bbbe;
+  cursor: pointer;
+  margin-bottom: 20px;
+  border-radius: 4px;
+  transition: 0.2s;
+}
+
+.add-friend-trigger:hover {
+  background: #35393e;
+  color: white;
+}
+
+
+.friend-modal {
+  background: #313338;
+  padding: 24px;
+  border-radius: 8px;
+  width: 350px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+.friend-modal h3 { color: white; margin-top: 0; }
+
+.friend-modal input {
+  width: 100%;
+  padding: 10px;
+  background: #1e1f22;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  margin: 15px 0;
+}
+
+.friend-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.send-btn { background: #5865f2; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
+.cancel-btn { background: transparent; color: white; border: none; cursor: pointer; }
+
+.message.error { color: #f23f42; font-size: 12px; }
+.message.success { color: #23a55a; font-size: 12px; }
+
+.badge {
+  background: #f23f42;
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+}
+
+.request-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-bottom: 1px solid #3f4147;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: white;
+}
+
+.avatar-placeholder {
+  width: 32px;
+  height: 32px;
+  background: #5865f2;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.btn-accept {
+  background: #23a55a;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 5px;
+}
+
+.btn-reject {
+  background: #4e5058;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #949ba4;
+}
+
+.sidebar-btn {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.close-requests-btn {
+  background-color: #cc382e;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}

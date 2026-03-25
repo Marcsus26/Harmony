@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from .views import UserView, RegisterView, CurrentUserView, ProfileUpdateView, GameSuggestionsView, UserServersView, ServerCreateView, ServerChannelsView, ChannelMessagesView, ChannelCreateView, MessageCreateView, ServerUpdateMembersView, UserServersView, ServerCreateView, ServerChannelsView, ChannelMessagesView, ChannelCreateView, MessageCreateView, ServerUpdateMembersView, ServerDeleteView, ServerLeaveView, RefuseGameView, UserStatsView, SteamGameDetailsView
+from .views import UserView, RegisterView, CurrentUserView, ProfileUpdateView, GameSuggestionsView, UserServersView, ServerCreateView, ServerChannelsView, ChannelMessagesView, ChannelCreateView, MessageCreateView, ServerUpdateMembersView, UserServersView, ServerCreateView, ServerChannelsView, ChannelMessagesView, ChannelCreateView, MessageCreateView, ServerUpdateMembersView, ServerDeleteView, ServerLeaveView, RefuseGameView, UserStatsView, SteamGameDetailsView, SendFriendRequestView, PendingRequestsListView, RespondToRequestView, FriendsListView
 
 urlpatterns = [
     path('', UserView.as_view()),
@@ -22,4 +22,8 @@ urlpatterns = [
     path('recommendations/refuse/', RefuseGameView.as_view()),
     path('steam-details/<str:appid>/', SteamGameDetailsView.as_view(), name='steam-details'),
     path('recommendations/stats/', UserStatsView.as_view(), name='user_stats'),
+    path('friends/send/', SendFriendRequestView.as_view(), name='send-friend-request'),
+    path('friends/pending/', PendingRequestsListView.as_view(), name='pending-friends'),
+    path('friends/respond/<int:request_id>/', RespondToRequestView.as_view(), name='respond-friend'),
+    path('friends/list/', FriendsListView.as_view(), name='friends-list'),
 ]
