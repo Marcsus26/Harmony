@@ -192,10 +192,6 @@ function App() {
             <Route path="/" element={
               <div className="app-container">
                 <Sidebar friends={friends}
-                servers={servers} 
-                onServerCreated={loadServers} 
-                activeServerId={activeServerId} 
-                onSelectServer={setActiveServerId} 
                 currentUser={user}
                 userStats={userStats}/>
                 <GamesSidebar 
@@ -222,10 +218,11 @@ function App() {
                   activeChannelId={activeChannelId} 
                   onSelectChannel={setActiveChannelId}
                   onChannelCreated={fetchChannels}
-                  suggestedGames={suggestedGames}
-                  hasSteamLinked={hasSteamLinked}
-                  isLoadingSuggestions={isLoadingSuggestions}
-                  userStats={userStats}
+                  servers={servers} 
+                  onServerCreated={loadServers} 
+                  onSelectServer={setActiveServerId} 
+                  currentUser={user}
+                  friends={friends}
                 />
               </div>
             } />

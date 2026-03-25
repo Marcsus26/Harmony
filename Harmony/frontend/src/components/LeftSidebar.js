@@ -55,80 +55,7 @@ function ServerItem({ icon, name }) {
     )
 };
 
-function Sidebar({ friends, servers, onServerCreated, activeServerId, onSelectServer, currentUser, userStats }) {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const [name, setName] = useState('');
-  const [iconUrl, setIconUrl] = useState('');
-  const [selectedFriends, setSelectedFriends] = useState([]);
-  const [isEditing, setIsEditing] = useState(false);
-
-  const currentServer = servers.find(s => s.id === activeServerId);
-  const isOwner = currentServer ? currentServer?.owner === currentUser?.id : true;
-
-
-  const toggleFriend = (id) => {
-    setSelectedFriends(prev => 
-      prev.includes(id) ? prev.filter(fid => fid !== id) : [...prev, id]
-    );
-  };
-
-  const handleLeave = async () => {
-    if (!window.confirm(`Are you sure you want to leave ${currentServer.name}?`)) return;
-
-    try {
-      await api.post(`/api/servers/${activeServerId}/leave/`);
-      
-      setShowModal(false);
-      onSelectServer(null);
-      onServerCreated();
-    } catch (err) {
-      alert("Error leaving server");
-    }
-  };
-
-  const openCreateModal = () => {
-    setIsEditing(false);
-    setName('');
-    setIconUrl('');
-    setSelectedFriends([]);
-    setShowModal(true);
-  };
-
-
-  const openEditModal = () => {
-    if (!currentServer) return;
-    setIsEditing(true);
-    setName(currentServer.name);
-    setIconUrl(currentServer.icon_url || '');
-    setSelectedFriends(currentServer.users || []); 
-    setShowModal(true);
-  };
-
-  const handleSave = async (e) => {
-    e.preventDefault();
-    try {
-      if (isEditing) {
-        await api.patch(`/api/servers/${activeServerId}/update-members/`, {
-          users: selectedFriends,
-          name: name,
-          icon_url: iconUrl
-        });
-      } else {
-        // POST new server
-        await api.post('/api/servers/create/', {
-          name: name,
-          icon_url: iconUrl,
-          users: selectedFriends
-        });
-      }
-      
-      setShowModal(false);
-      if (onServerCreated) onServerCreated(); // Refresh the list
-    } catch (err) {
-      alert(isEditing ? "Failed to update server" : "Failed to create server");
-    }
-  };
+function Sidebar({ friends, currentUser, userStats }) {
 
   // Sort friends so online ones are at the top
   const sortedFriends = [...friends].sort((a, b) => 
@@ -139,39 +66,6 @@ function Sidebar({ friends, servers, onServerCreated, activeServerId, onSelectSe
     { id: 101, name: "Slayer_X", game: "Counter-Strike 2", avatar: logo },
     { id: 102, name: "DotaQueen", game: "Dota 2", avatar: logo },
   ];
-
-  const getServerInitials = (name) => {
-  return name
-    .split(' ')
-    .map(word => word[0])
-    .join('')
-    .substring(0, 3)
-    .toUpperCase();
-  };
-
-  useEffect(() => {
-    onServerCreated();
-  }, []);
-
-  const handleDelete = async () => {
-  // Always good to double-check before deleting!
-  if (!window.confirm(`Are you sure you want to delete "${currentServer.name}"? This cannot be undone.`)) {
-    return;
-  }
-
-  try {
-    await api.delete(`/api/servers/${activeServerId}/delete/`);
-    
-    setShowModal(false);
-    
-    if (onSelectServer) onSelectServer(null);
-    
-    if (onServerCreated) onServerCreated();
-  } catch (err) {
-    console.error(err);
-    alert("Failed to delete server. Only the owner can delete a server.");
-  }
-};
 
   return (
     <div className="sidebar">
@@ -192,93 +86,6 @@ function Sidebar({ friends, servers, onServerCreated, activeServerId, onSelectSe
                 <UserStatsChart stats={userStats} />
             </div>
       </div>
-
-      <div className={`server-panel ${isExpanded ? 'expanded' : ''}`}>
-        <div className="panel-header">
-          <div onClick={() => setIsExpanded(!isExpanded)} style={{cursor: 'pointer'}}>
-            <span>SERVERS</span>
-            <span>{isExpanded ? ' ▼' : ' ▲'}</span>
-          </div>
-          <div className="panel-buttons">
-            {activeServerId && (
-              <button className="edit-server-btn" onClick={openEditModal} title="Manage Server">⚙️</button>
-            )}
-            <button className="add-server-btn" onClick={openCreateModal}>+</button>
-          </div>
-        </div>
-
-        {isExpanded && (
-          <div className="server-list">
-            {servers.map(server => (
-              <div key={server.id} 
-                onClick={() => onSelectServer(server.id)} 
-                className={`server-item ${activeServerId === server.id ? 'active' : ''}`}
-                title={server.name}>
-                <div className="server-icon">
-                  {server.icon_url ? <img src={server.icon_url} alt="" /> : <span>{getServerInitials(server.name)}</span>}
-                </div>
-                <div className='server-name'>{server.name}</div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {showModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h3>{isEditing ? 'Manage Server' : 'Create Your Server'}</h3>
-            <p>{isEditing ? 'Update your server details or member list.' : 'Give your new server a personality.'}</p>
-            
-            <form onSubmit={handleSave}>
-              <div className="input-group">
-                <label>SERVER NAME</label>
-                <input required value={name} onChange={e => setName(e.target.value)} placeholder="Enter server name" />
-              </div>
-
-              <div className="input-group">
-                <label>ICON URL (OPTIONAL)</label>
-                <input value={iconUrl} onChange={e => setIconUrl(e.target.value)} placeholder="https://..." />
-              </div>
-
-              <div className="member-select-section">
-                <label>{isEditing ? 'MANAGE MEMBERS' : 'INVITE FRIENDS'}</label>
-                <div className="member-list-scroll">
-                  {friends.map(f => (
-                    <div key={f.id} className="member-select-item">
-                      <span>{f.name}</span>
-                      <input 
-                        type="checkbox" 
-                        checked={selectedFriends.includes(f.id)} 
-                        onChange={() => toggleFriend(f.id)} 
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="modal-actions">
-                <div className="left-actions">
-                  {isEditing && (
-                      isOwner ? (
-                      <button type="button" className="delete-server-btn" onClick={handleDelete}>
-                        Delete Server
-                      </button>
-                    ) : (
-                      <button type="button" className="leave-server-btn" onClick={handleLeave}>
-                        Leave Server
-                      </button>
-                    )
-                  )}
-                </div>
-                <div className="right-actions">
-                  <button type="button" className="cancel-btn" onClick={() => setShowModal(false)}>Back</button>
-                  {isOwner && <button type="submit" className="save-btn">{isEditing ? 'Save Changes' : 'Create'}</button>}
-                </div>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

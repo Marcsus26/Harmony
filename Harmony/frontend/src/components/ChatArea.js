@@ -91,7 +91,7 @@ function ChatArea({ messages, activeChannelId, onMessageSent }) {
             <div className="message-content">
               <div className="message-header">
                 <span className="username">{msg.author_name}</span>
-                <span className="timestamp">{new Date(msg.timestamp).toLocaleTimeString()}</span>
+                <span className="timestamp">{new Date(msg.timestamp).toLocaleString()}</span>
               </div>
               <div className="text">{msg.content}</div>
             </div>
