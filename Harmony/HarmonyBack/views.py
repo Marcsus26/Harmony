@@ -369,7 +369,35 @@ class FriendsListView(APIView):
             "steam_id": friend.steam_id,
             "avatar": friend.profile.profile_pic_url,
             "is_online": friend.is_online,
-            # You can add 'is_online' logic here later
+            "bio": friend.profile.bio,
         } for friend in friends]
         
         return Response(data)
+    
+class FriendsUserStatsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+
+        csv_path = Path(__file__).resolve().parent / "steamspy_details_cleaned.csv"
+
+        try:
+            radar_data_all = []
+            for friend in request.user.friends.all():
+                prefs = create_user_pref_dict(friend.steam_id, csv_path)
+                
+                if not prefs:
+                    return Response([], status=200)
+
+                radar_data = []
+                for genre, score in list(prefs.items())[:6]:
+                    radar_data.append({
+                        "subject": genre,
+                        "A": round(score, 1),
+                        "fullMark": 100
+                    })
+                radar_data.append({'id': friend.id})
+                radar_data_all.append(radar_data)
+            return Response(radar_data_all, status=200)
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)

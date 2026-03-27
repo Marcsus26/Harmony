@@ -33,17 +33,46 @@ function SuggestedFriendItem({ name, game, avatar }) {
     )
 };
 
-// A single Friend row in the sidebar
-function FriendItem({ name, status, avatar }) {
+function FriendStatsModal({ isOpen, onClose, friendName, stats, bio }) {
+    if (!isOpen) return null;
+
+    console.log(bio);
+
     return (
-        <div className="sidebar-item">
+        <div className="modal-overlay" onClick={onClose}>
+            <div className="stats-modal-content" onClick={e => e.stopPropagation()}>
+                <div className="modal-header">
+                    <h3>{friendName}'s Gaming Profile</h3>
+                    <button className="close-x" onClick={onClose}>✕</button>
+                </div>
+                <div className="modal-body">
+                    {stats ? (
+                        <UserStatsChart stats={stats} />
+                    ) : (
+                        <p className="no-data">No stats available for this user.</p>
+                    )}
+                    <div className="modal-header">
+                      {friendName}'s bio :
+                      <br/>
+                    </div>
+                    {bio}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function FriendItem({ name, status, avatar, onClick }) {
+    return (
+        <div className="sidebar-item friend-row" onClick={onClick}>
             <div className="avatar-wrapper">
-            <img src={avatar} className="sidebar-avatar" alt={name} />
-            <div className={`status-dot ${status ? 'online' : 'offline'}`}></div>
+                <img src={avatar} className="sidebar-avatar" alt={name} />
+                <div className={`status-dot ${status ? 'online' : 'offline'}`}></div>
             </div>
             <span>{name}</span>
+            <div className="view-stats-hint">View Stats</div>
         </div>
-    )
+    );
 };
 
 function AddFriendModal({ isOpen, onClose }) {
@@ -90,7 +119,7 @@ function AddFriendModal({ isOpen, onClose }) {
   );
 }
 
-function Sidebar({ friends, currentUser, userStats }) {
+function Sidebar({ friends, currentUser, userStats, friendsStats }) {
 
   // Fake suggestions data
   const suggestions = [
@@ -99,6 +128,23 @@ function Sidebar({ friends, currentUser, userStats }) {
   ];
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedFriend, setSelectedFriend] = useState(null);
+  const [isStatsModalOpen, setIsStatsModalOpen] = useState(false);
+
+  const handleFriendClick = (friend) => {
+      console.log(friend);
+      const stats = findFriendStats(friend.id);
+      setSelectedFriend({ ...friend, stats });
+      setIsStatsModalOpen(true);
+    };
+
+  const findFriendStats = (id) => {
+    for (let i = 0; i< friendsStats.length; i++) {
+      if (friendsStats[i][friendsStats[i].length - 1].id === id) {
+        return friendsStats[i].slice(0, 6);
+      }
+    }
+  }
 
   const [isRequestsOpen, setIsRequestsOpen] = useState(false);
   const [requestCount, setRequestCount] = useState(0);
@@ -124,7 +170,11 @@ function Sidebar({ friends, currentUser, userStats }) {
       <div className="top-sections">
         <div className="friends-section">
           <p className="sidebar-label">DIRECT MESSAGES</p>
-          {friends.map(f => <FriendItem key={f.id} name={f.username} status={f.is_online} avatar={f.avatar === '' ? logo : f.avatar} />)}
+          {friends.map(f => <FriendItem key={f.id} 
+          name={f.username} 
+          status={f.is_online} 
+          avatar={f.avatar === '' ? logo : f.avatar}
+          onClick={() => handleFriendClick(f)}/>)}
         </div>
         <SidebarDivider label="SUGGESTED PLAYERS" />
 
@@ -138,6 +188,13 @@ function Sidebar({ friends, currentUser, userStats }) {
                 <UserStatsChart stats={userStats} />
             </div>
       </div>
+      <FriendStatsModal 
+        isOpen={isStatsModalOpen} 
+        onClose={() => setIsStatsModalOpen(false)}
+        friendName={selectedFriend?.username}
+        stats={selectedFriend?.stats}
+        bio={selectedFriend?.bio}
+      />
       <button className="add-friend-trigger" onClick={() => setIsModalOpen(true)}>
             + Add Friend
       </button>
