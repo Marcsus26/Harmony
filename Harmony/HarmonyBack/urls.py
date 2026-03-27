@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from .views import UserView, RegisterView, CurrentUserView, ProfileUpdateView, GameSuggestionsView, UserServersView, ServerCreateView, ServerChannelsView, ChannelMessagesView, ChannelCreateView, MessageCreateView, ServerUpdateMembersView, UserServersView, ServerCreateView, ServerChannelsView, ChannelMessagesView, ChannelCreateView, MessageCreateView, ServerUpdateMembersView, ServerDeleteView, ServerLeaveView, RefuseGameView,LikeGameView,LikeGameView, UserStatsView, SteamGameDetailsView, SendFriendRequestView, PendingRequestsListView, RespondToRequestView, FriendsListView, FriendsUserStatsView, SuggestedPlayersView, FriendsUserStatsView
+from .views import UserView, RegisterView, CurrentUserView, ProfileUpdateView, GameSuggestionsView, UserServersView, ServerCreateView, ServerChannelsView, ChannelMessagesView, ChannelCreateView, MessageCreateView, ServerUpdateMembersView, UserServersView, ServerCreateView, ServerChannelsView, ChannelMessagesView, ChannelCreateView, MessageCreateView, ServerUpdateMembersView, ServerDeleteView, ServerLeaveView, RefuseGameView,LikeGameView,LikeGameView, UserStatsView, SteamGameDetailsView, SendFriendRequestView, PendingRequestsListView, RespondToRequestView, FriendsListView, FriendsUserStatsView, SuggestedPlayersView, FriendsUserStatsView, SuggestedPlayersView
 
 urlpatterns = [
     path('', UserView.as_view()),
@@ -30,4 +30,5 @@ urlpatterns = [
     path('recommendations/friends-stats/', FriendsUserStatsView.as_view(), name='friend-stats'),
     path('players/suggested/', SuggestedPlayersView.as_view(), name='suggested_players'),
     path('recommendations/friends-stats/', FriendsUserStatsView.as_view(), name='friend-stats'),
+    path('players/suggested/', SuggestedPlayersView.as_view(), name='suggested_players'),
 ]
