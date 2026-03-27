@@ -114,7 +114,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 .vscode/
-*.csv
 MockupFront/harmony_gui/node_modules
 .DS_Store
 Harmony/frontend/node_modules
