@@ -48,7 +48,7 @@ function SuggestedFriendItem({ id, username, similarity_score, avatar, is_online
             </div>
             <div className="item-details">
                 <span className="username">{username}</span>
-                <span className="current-game">Affinité du moment : {similarity_score}%</span>
+                <span className="current-game">Similarity : {similarity_score}%</span>
             </div>
             
             <button 
@@ -187,7 +187,7 @@ function Sidebar({ friends, currentUser, userStats, friendsStats }) {
     };
     
     fetchSuggestions();
-  }, []); // Le tableau vide indique que ça s'exécute une seule fois au montage
+  }, [friends]);
 
   const checkCount = async () => {
       const res = await api.get('/api/friends/pending/');
@@ -236,6 +236,7 @@ function Sidebar({ friends, currentUser, userStats, friendsStats }) {
         stats={selectedFriend?.stats}
         bio={selectedFriend?.bio}
       />
+      <div className='sidebar-footer'>
       <button className="add-friend-trigger" onClick={() => setIsModalOpen(true)}>
             + Add Friend
       </button>
@@ -243,6 +244,7 @@ function Sidebar({ friends, currentUser, userStats, friendsStats }) {
         Friend Requests
         {requestCount > 0 && <span className="badge">{requestCount}</span>}
       </button>
+      </div>
       <PendingRequestsModal isOpen={isRequestsOpen} onClose={handleRequestsClose} />
       <AddFriendModal 
       isOpen={isModalOpen} 

@@ -29,7 +29,7 @@ function UserStatsChart({ stats }) {
   },[statsSignature]);
   return (
         <div style={{ width: '100%', height: '220px', marginTop: '10px' }}>
-            {memoizedChart || <p>Chargement...</p>}
+            {memoizedChart || <p>Loading...</p>}
         </div>
     );
 }
