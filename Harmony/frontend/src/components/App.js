@@ -32,6 +32,8 @@ function App() {
   const [hasSteamLinked, setHasSteamLinked] = useState(false);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [suggestionsRefreshKey, setSuggestionsRefreshKey] = useState(0);
+  const [leftOpen, setLeftOpen] = useState(false);
+  const [rightOpen, setRightOpen] = useState(false);
 
   const fetchStats = async () => {
     try {
@@ -256,11 +258,16 @@ function App() {
         <Route path="/login" element={<Login setAuth={setIsAuthenticated}/>} />
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={
-              <div className="app-container">
-                <Sidebar friends={friends}
-                currentUser={user}
-                friendsStats={friendsStats}
-                userStats={userStats}/>
+            <div className="app-container">
+                {/* 1. Use the component directly, and pass the mobile class */}
+                <Sidebar 
+                  className={leftOpen ? 'mobile-open' : ''} // Pass state down
+                  friends={friends} 
+                  userStats={userStats} 
+                  friendsStats={friendsStats} 
+                  currentUser={user}
+                  setLeftOpen={setLeftOpen} // Pass the closer too!
+                />
                 <GamesSidebar 
                   suggestedGames={suggestedGames}
                   setSuggestedGames={setSuggestedGames}
@@ -271,18 +278,25 @@ function App() {
                   refreshGamesList={fetchSuggestions} 
                 />
 
-                <SteamView 
-                  gameId={activeSteamGameId} 
-                  onClose={() => setActiveSteamGameId(null)} 
-                />
                 <main className="main-content">
+                  {/* 2. This header should ONLY exist on mobile */}
+                  <div className="mobile-nav-header">
+                    <button className="menu-btn" onClick={() => setLeftOpen(true)}>☰</button>
+                    <span className="mobile-logo">HARMONY</span>
+                    <button className="menu-btn" onClick={() => setRightOpen(true)}>⚙️</button>
+                  </div>
+                  
                   <UserAccount setAuth={setIsAuthenticated} />
-                  <ChatArea messages={messages}
-                  activeChannelId={activeChannelId} 
-                  onMessageSent={fetchMessages}/>
+                  <ChatArea 
+                    messages={messages}
+                    activeChannelId={activeChannelId} 
+                    onMessageSent={fetchMessages}
+                  />
                 </main>
 
-                <RightSidebar channels={channels} 
+                <RightSidebar 
+                  className={rightOpen ? 'mobile-open' : ''}
+                  channels={channels} 
                   activeServerId={activeServerId}
                   activeChannelId={activeChannelId} 
                   onSelectChannel={setActiveChannelId}
@@ -292,6 +306,7 @@ function App() {
                   onSelectServer={setActiveServerId} 
                   currentUser={user}
                   friends={friends}
+                  setRightOpen={setRightOpen}
                 />
               </div>
             } />

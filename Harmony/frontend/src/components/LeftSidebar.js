@@ -208,6 +208,7 @@ function Sidebar({ friends, currentUser, userStats, friendsStats }) {
 
   return (
     <div className="sidebar">
+      <button className="mobile-close" onClick={() => setLeftOpen(false)}>✕</button>
       <div className="top-sections">
         <div className="friends-section">
           <p className="sidebar-label">YOUR FRIENDS</p>

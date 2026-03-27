@@ -1076,3 +1076,111 @@ body, html {
   margin-top: auto;
   background-color: #1a1426; /* Keeps the background solid behind buttons */
 }
+
+/* --- DESKTOP HIDING --- */
+.mobile-nav-header, .mobile-close {
+  display: none; /* Hidden on PC by default */
+}
+
+/* --- DESKTOP STYLES (Default) --- */
+.sidebar {
+  position: relative;
+  width: 20%;
+}
+
+.right-sidebar {
+  position: relative;
+  width: 15%;
+}
+
+.games-sidebar {
+  position: relative;
+  width: 25%;
+}
+
+.main-content {
+  width: auto;
+  flex: 1;
+}
+
+/* --- MOBILE RESPONSIVENESS (Breakpoints) --- */
+@media (max-width: 768px) {
+  .app-container {
+    flex-direction: row; /* Keep it row, but sidebars will be absolute */
+  }
+
+  .mobile-nav-header {
+    display: flex; /* Show only on mobile */
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background-color: #1a1426;
+    border-bottom: 1px solid #3a2563;
+  }
+
+  .mobile-close {
+    display: block;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+  }
+
+  /* SIDEBARS: Hide them off-screen by default */
+  .sidebar, .right-sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    width: 280px; /* Fixed width for mobile drawers */
+    z-index: 1000;
+    transition: transform 0.3s ease-in-out;
+    background-color: #1e1b2e; /* Solid background so chat doesn't bleed through */
+    box-shadow: 5px 0 15px rgba(0,0,0,0.5);
+  }
+
+  /* Left Sidebar: Slide in from left */
+  .sidebar {
+    left: 0;
+    transform: translateX(-100%);
+  }
+
+  /* Right Sidebar: Slide in from right */
+  .right-sidebar {
+    right: 0;
+    transform: translateX(100%);
+  }
+
+  /* Classes to trigger opening */
+  .sidebar.mobile-open { transform: translateX(0); }
+  .right-sidebar.mobile-open { transform: translateX(0); }
+
+  /* Hide games sidebar on mobile */
+  .games-sidebar {
+    display: none;
+  }
+
+  /* MAIN CONTENT: Force it to fill the screen */
+  .main-content {
+    width: 100vw;
+    flex: none;
+  }
+
+  /* Adjust Chat Input for thumbs */
+  .input-container {
+    padding: 10px;
+  }
+  
+  .discord-input {
+    font-size: 16px; /* Prevents iOS from zooming in on input focus */
+  }
+
+  /* Shrink the welcome text */
+  .welcome {
+    font-size: 1.5rem;
+    width: 80%;
+    text-align: center;
+  }
+}
