@@ -1,7 +1,11 @@
 body, html {
   margin: 0;
   padding: 0;
-  background-color: #313338;
+  background-color: #0d0914; /* Deep space dark background */
+  background-image: 
+    radial-gradient(circle at 15% 50%, rgba(124, 58, 237, 0.08), transparent 25%),
+    radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.08), transparent 25%);
+  color: #e2e8f0;
 }
 
 /* Layout Container */
@@ -24,9 +28,10 @@ body, html {
 /* RIGHT SIDEBAR */
 .right-sidebar {
   width: 15%;
-  background-color: #2b2d31;
-  border-left: 1px solid #1e1f22;
-  color: white;
+  background-color: rgba(30, 27, 46, 0.7); /* Translucent dark violet */
+  backdrop-filter: blur(10px);
+  border-left: 1px solid #4a3875;
+  color: #e2e8f0;
   display: flex;
   flex-direction: column;
 }
@@ -45,24 +50,15 @@ body, html {
 }
 
 .channel-item:hover {
-  background-color: #35373c;
+  background-color: #231836;
   color: white;
 }
 
 .channel-item.active {
-  background-color: #404249; /* Slightly lighter highlight than hover */
+  background-color: #3d286b; /* Slightly lighter highlight than hover */
   color: #ffffff; /* Pure white text for the active channel */
 }
 
-.channel-item.active::before {
-  content: "";
-  position: absolute;
-  left: -8px;
-  width: 4px;
-  height: 24px;
-  background-color: white;
-  border-radius: 0 4px 4px 0;
-}
 
 /* TOP RIGHT USER BUTTON */
 .user-nav {
@@ -76,7 +72,7 @@ body, html {
   width: 45px;
   height: 45px;
   border-radius: 50%;
-  border: 2px solid #23a55a; /* Steam Green! */
+  border: 2px solid #ec4899; /* Steam Green! */
   overflow: hidden;
   cursor: pointer;
   background: none;
@@ -94,7 +90,7 @@ body, html {
   top: 55px;
   right: 0;
   width: 200px;
-  background-color: #111214;
+  background-color: #090510;
   border-radius: 8px;
   box-shadow: 0 8px 16px rgba(0,0,0,0.5);
   padding: 8px;
@@ -114,14 +110,14 @@ body, html {
 }
 
 .settings-dropdown li:hover {
-  background-color: #4752c4; /* Discord blue */
+  background-color: #7c3aed; /* Discord blue */
   color: white;
 }
 
 /* SIDEBAR STYLES */
 .sidebar {
   width: 20%;
-  background-color: #2b2d31;
+  background-color: #1a1426;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -144,7 +140,7 @@ body, html {
 }
 
 .sidebar-item:hover {
-  background-color: #35373c;
+  background-color: #231836;
   border-radius: 4px;
   margin: 0 8px;
 }
@@ -153,7 +149,7 @@ body, html {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background-color: #313338;
+  background-color: #0d0914;
 }
 
 /* Status Dots */
@@ -165,14 +161,14 @@ body, html {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  border: 2px solid #2b2d31;
+  border: 2px solid #1a1426;
 }
-.status-dot.online { background-color: #23a55a; }
+.status-dot.online { background-color: #ec4899; }
 .status-dot.offline { background-color: #80848e; }
 
 /* EXPANDABLE PANEL */
 .server-panel {
-  background-color: #232428;
+  background-color: #130e1d;
   padding: 10px;
   transition: all 0.3s ease;
 }
@@ -226,7 +222,7 @@ body, html {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #313338; /* Dark grey fallback background */
+  background-color: #0d0914; /* Dark grey fallback background */
 }
 
 .server-icon img {
@@ -248,7 +244,7 @@ body, html {
 .chat-wrapper {
   width: 40%;
   margin: 0 auto;
-  background-color: #313338;
+  background-color: #0d0914;
   height: 80vh;
   position: fixed;
   left: 45%;
@@ -259,7 +255,7 @@ body, html {
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 .App-backround {
-  background-color: #313338;
+  background-color: #0d0914;
   min-height: 100vh; 
   width: 100%;
   margin: 0;
@@ -285,7 +281,7 @@ body, html {
 }
 
 .discord-message:hover {
-  background-color: #2e3035;
+  background-color: #1c122b;
 }
 
 .avatar {
@@ -294,7 +290,7 @@ body, html {
   border-radius: 50%;
   margin-right: 16px;
   object-fit: cover;
-  background-color: #383a40;
+  background-color: #2b1f45;
 }
 
 .message-header {
@@ -329,7 +325,7 @@ body, html {
 
 .discord-input {
   width: 100%;
-  background-color: #383a40;
+  background-color: #2b1f45;
   color: #dbdee1;
   border: none;
   border-radius: 8px;
@@ -349,7 +345,7 @@ body, html {
 .divider-line {
   flex: 1;
   height: 1px;
-  background-color: #3f4147; /* Subtle dark gray line */
+  background-color: #3a2563; /* Subtle dark gray line */
 }
 
 .divider-label {
@@ -368,14 +364,14 @@ body, html {
 
 .current-game {
   font-size: 11px;
-  color: #23a55a; /* Steam "In-Game" green */
+  color: #ec4899; /* Steam "In-Game" green */
   font-weight: 500;
 }
 
 .add-friend-btn {
   background: none;
   border: none;
-  color: #b5bac1;
+  color: #ec4899;
   font-size: 20px;
   cursor: pointer;
   padding: 0 5px;
@@ -387,7 +383,7 @@ body, html {
 
 /* Container for the game cards */
 .games-panel {
-  border-top: 1px solid #1e1f22; /* Separator from channels */
+  border-top: 1px solid #271a42; /* Separator from channels */
 }
 
 /* The Individual Game Card */
@@ -397,14 +393,14 @@ body, html {
   gap: 12px;
   padding: 8px;
   margin-bottom: 8px;
-  background-color: #232428; /* Slightly darker "inset" look */
+  background-color: #130e1d; /* Slightly darker "inset" look */
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
 
 .game-card:hover {
-  background-color: #35373c;
+  background-color: #231836;
 }
 
 /* The Game Image (Steam Header Style) */
@@ -429,12 +425,12 @@ body, html {
 .add-server-btn {
   background: none;
   border: none;
-  color: #23a55a;
+  color: #ec4899;
   font-size: 20px;
   cursor: pointer;
   transition: transform 0.2s;
 }
-.add-server-btn:hover { transform: scale(1.2); color: #2db86a; }
+.add-server-btn:hover { transform: scale(1.2); color: #f472b6; }
 
 /* Modal Styles */
 .modal-overlay {
@@ -448,7 +444,7 @@ body, html {
 }
 
 .modal-content {
-  background: #313338;
+  background: #0d0914;
   padding: 30px;
   border-radius: 8px;
   width: 400px;
@@ -462,7 +458,7 @@ body, html {
 .member-list-scroll {
   max-height: 150px;
   overflow-y: auto;
-  background: #1e1f22;
+  background: #271a42;
   border-radius: 4px;
   padding: 10px;
   margin-top: 10px;
@@ -472,7 +468,7 @@ body, html {
   display: flex;
   justify-content: space-between;
   padding: 8px 0;
-  border-bottom: 1px solid #2b2d31;
+  border-bottom: 1px solid #1a1426;
 }
 
 .modal-actions {
@@ -505,7 +501,7 @@ body, html {
 .channel-input-wrapper {
   display: flex;
   align-items: center;
-  background: #1e1f22;
+  background: #271a42;
   border-radius: 4px;
   padding: 0 10px;
 }
@@ -553,7 +549,7 @@ body, html {
   position: relative; /* Anchor for the picker */
   display: flex;
   align-items: center;
-  background-color: #383a40;
+  background-color: #2b1f45;
   border-radius: 8px;
   padding: 0 12px;
 }
@@ -569,7 +565,7 @@ body, html {
 /* Make the actual picker match your theme better */
 .epr-main {
   border: none !important;
-  background-color: #2b2d31 !important;
+  background-color: #1a1426 !important;
 }
 
 .emoji-button {
@@ -592,12 +588,12 @@ body, html {
 .add-server-btn {
   background: none;
   border: none;
-  color: #23a55a;
+  color: #ec4899;
   font-size: 20px;
   cursor: pointer;
   transition: transform 0.2s;
 }
-.add-server-btn:hover { transform: scale(1.2); color: #2db86a; }
+.add-server-btn:hover { transform: scale(1.2); color: #f472b6; }
 
 /* Modal Styles */
 .modal-overlay {
@@ -611,7 +607,7 @@ body, html {
 }
 
 .modal-content {
-  background: #313338;
+  background: #0d0914;
   padding: 30px;
   border-radius: 8px;
   width: 400px;
@@ -625,7 +621,7 @@ body, html {
 .member-list-scroll {
   max-height: 150px;
   overflow-y: auto;
-  background: #1e1f22;
+  background: #271a42;
   border-radius: 4px;
   padding: 10px;
   margin-top: 10px;
@@ -635,7 +631,7 @@ body, html {
   display: flex;
   justify-content: space-between;
   padding: 8px 0;
-  border-bottom: 1px solid #2b2d31;
+  border-bottom: 1px solid #1a1426;
 }
 
 .modal-actions {
@@ -679,7 +675,7 @@ body, html {
 }
 
 .save-btn {
-  background-color: #5865f2; /* Discord Blue */
+  background-color: #8b5cf6; /* Discord Blue */
   color: white;
   border: none;
   padding: 10px 24px;
@@ -689,7 +685,7 @@ body, html {
 }
 
 .save-btn:hover {
-  background-color: #4752c4;
+  background-color: #7c3aed;
 }
 
 .leave-server-btn {
@@ -707,8 +703,8 @@ body, html {
 
 .games-sidebar {
   width: 25%; /* As requested */
-  background-color: #2b2d31;
-  border-right: 1px solid #1e1f22; /* Border on the right to separate from chat */
+  background-color: #1a1426;
+  border-right: 1px solid #271a42; /* Border on the right to separate from chat */
   display: flex;
   flex-direction: column;
   color: white;
@@ -727,7 +723,7 @@ body, html {
   align-items: center;
   gap: 15px;
   padding: 12px;
-  background-color: #232428;
+  background-color: #130e1d;
   border-radius: 8px;
   transition: background 0.2s;
 }
@@ -753,7 +749,7 @@ body, html {
 
 .game-status {
   font-size: 11px;
-  color: #23a55a;
+  color: #ec4899;
 }
 
 .steam-view-container {
@@ -781,7 +777,7 @@ body, html {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid #1e1f22;
+  border-bottom: 1px solid #271a42;
 }
 
 .steam-header span {
@@ -791,7 +787,7 @@ body, html {
 }
 
 .close-steam-btn {
-  background-color: #4752c4;
+  background-color: #7c3aed;
   color: white;
   border: none;
   padding: 8px 16px;
@@ -887,9 +883,9 @@ body, html {
 .add-friend-trigger {
   width: 100%;
   padding: 10px;
-  background: #2a2d32;
-  border: 1px dashed #4f545c;
-  color: #b9bbbe;
+  background: #2f2033;
+  border: 1px dashed #312437;
+  color: #ec4899;
   cursor: pointer;
   margin-bottom: 20px;
   border-radius: 4px;
@@ -903,7 +899,7 @@ body, html {
 
 
 .friend-modal {
-  background: #313338;
+  background: #0d0914;
   padding: 24px;
   border-radius: 8px;
   width: 350px;
@@ -915,7 +911,7 @@ body, html {
 .friend-modal input {
   width: 100%;
   padding: 10px;
-  background: #1e1f22;
+  background: #271a42;
   border: none;
   border-radius: 4px;
   color: white;
@@ -928,11 +924,11 @@ body, html {
   gap: 10px;
 }
 
-.send-btn { background: #5865f2; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
+.send-btn { background: #8b5cf6; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
 .cancel-btn { background: transparent; color: white; border: none; cursor: pointer; }
 
 .message.error { color: #f23f42; font-size: 12px; }
-.message.success { color: #23a55a; font-size: 12px; }
+.message.success { color: #ec4899; font-size: 12px; }
 
 .badge {
   background: #f23f42;
@@ -950,7 +946,7 @@ body, html {
   justify-content: space-between;
   align-items: center;
   padding: 12px;
-  border-bottom: 1px solid #3f4147;
+  border-bottom: 1px solid #3a2563;
 }
 
 .user-info {
@@ -963,7 +959,7 @@ body, html {
 .avatar-placeholder {
   width: 32px;
   height: 32px;
-  background: #5865f2;
+  background: #8b5cf6;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -972,7 +968,7 @@ body, html {
 }
 
 .btn-accept {
-  background: #23a55a;
+  background: #ec4899;
   color: white;
   border: none;
   padding: 6px 12px;
@@ -1022,7 +1018,7 @@ body, html {
     transition: opacity 0.2s;
     text-transform: uppercase;
 }.stats-modal-content {
-    background: #313338;
+    background: #0d0914;
     width: 450px;
     padding: 24px;
     border-radius: 8px;

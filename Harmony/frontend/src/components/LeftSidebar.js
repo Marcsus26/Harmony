@@ -36,8 +36,6 @@ function SuggestedFriendItem({ name, game, avatar }) {
 function FriendStatsModal({ isOpen, onClose, friendName, stats, bio }) {
     if (!isOpen) return null;
 
-    console.log(bio);
-
     return (
         <div className="modal-overlay" onClick={onClose}>
             <div className="stats-modal-content" onClick={e => e.stopPropagation()}>
@@ -132,7 +130,6 @@ function Sidebar({ friends, currentUser, userStats, friendsStats }) {
   const [isStatsModalOpen, setIsStatsModalOpen] = useState(false);
 
   const handleFriendClick = (friend) => {
-      console.log(friend);
       const stats = findFriendStats(friend.id);
       setSelectedFriend({ ...friend, stats });
       setIsStatsModalOpen(true);

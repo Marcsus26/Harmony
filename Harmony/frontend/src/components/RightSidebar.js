@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../../static/css/index.css';
+import { createPortal } from 'react-dom';
 import api from '../api.js';
 
 
@@ -130,131 +131,138 @@ function RightSidebar({ channels, activeChannelId, onSelectChannel, onChannelCre
     }
   };
 
-    return (
+return (
         <div className="right-sidebar">
             <div className="panel channel-panel">
-            <p className="sidebar-label">SERVER CHANNELS</p>
-            {activeServerId && (
-          <button className="add-btn" onClick={() => setShowModal(true)}>+</button>
-        )}
-            {channels.map(chan => (
-                <div key={chan.id} 
-                    className={`channel-item ${activeChannelId === chan.id ? 'active' : ''}`}
-                    onClick={() => onSelectChannel(chan.id)}># {chan.name}</div>
-            ))}
+                <p className="sidebar-label">SERVER CHANNELS</p>
+                {activeServerId && (
+                    <button className="add-btn" onClick={() => setShowModal(true)}>+</button>
+                )}
+                {channels.map(chan => (
+                    <div key={chan.id} 
+                        className={`channel-item ${activeChannelId === chan.id ? 'active' : ''}`}
+                        onClick={() => onSelectChannel(chan.id)}># {chan.name}
+                    </div>
+                ))}
             </div>
-            {showModal && (
+
+            {/* CHANNEL MODAL PORTAL */}
+            {showModal && createPortal(
                 <div className="modal-overlay">
-                <div className="modal-content">
-                    <h3>Create Channel</h3>
-                    <form onSubmit={handleCreateChannel}>
-                    <div className="input-group">
-                        <label>CHANNEL NAME</label>
-                        <div className="channel-input-wrapper">
-                        <span className="hash-prefix">#</span>
-                        <input 
-                            required 
-                            autoFocus
-                            value={newChannelName} 
-                            onChange={e => setNewChannelName(e.target.value)} 
-                            placeholder="new-channel" 
-                        />
-                        </div>
+                    <div className="modal-content">
+                        <h3>Create Channel</h3>
+                        <form onSubmit={handleCreateChannel}>
+                            <div className="input-group">
+                                <label>CHANNEL NAME</label>
+                                <div className="channel-input-wrapper">
+                                    <span className="hash-prefix">#</span>
+                                    <input 
+                                        required 
+                                        autoFocus
+                                        value={newChannelName} 
+                                        onChange={e => setNewChannelName(e.target.value)} 
+                                        placeholder="new-channel" 
+                                    />
+                                </div>
+                            </div>
+                            <div className="modal-actions">
+                                <button type="button" className="cancel-btn" onClick={() => setShowModal(false)}>Cancel</button>
+                                <button type="submit" className="save-btn">Create Channel</button>
+                            </div>
+                        </form>
                     </div>
-                    <div className="modal-actions">
-                        <button type="button" className="cancel-btn" onClick={() => setShowModal(false)}>Cancel</button>
-                        <button type="submit" className="save-btn">Create Channel</button>
-                    </div>
-                    </form>
-                </div>
-                </div>
+                </div>,
+                document.body
             )}
-        <div className={`server-panel ${isExpanded ? 'expanded' : ''}`}>
-        <div className="panel-header">
-          <div onClick={() => setIsExpanded(!isExpanded)} style={{cursor: 'pointer'}}>
-            <span>SERVERS</span>
-            <span>{isExpanded ? ' ▼' : ' ▲'}</span>
-          </div>
-          <div className="panel-buttons">
-            {activeServerId && (
-              <button className="edit-server-btn" onClick={openEditModal} title="Manage Server">⚙️</button>
-            )}
-            <button className="add-server-btn" onClick={openCreateModal}>+</button>
-          </div>
-        </div>
 
-        {isExpanded && (
-          <div className="server-list">
-            {servers.map(server => (
-              <div key={server.id} 
-                onClick={() => onSelectServer(server.id)} 
-                className={`server-item ${activeServerId === server.id ? 'active' : ''}`}
-                title={server.name}>
-                <div className="server-icon">
-                  {server.icon_url ? <img src={server.icon_url} alt="" /> : <span>{getServerInitials(server.name)}</span>}
-                </div>
-                <div className='server-name'>{server.name}</div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {showServerModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h3>{isEditing ? 'Manage Server' : 'Create Your Server'}</h3>
-            <p>{isEditing ? 'Update your server details or member list.' : 'Give your new server a personality.'}</p>
-            
-            <form onSubmit={handleSave}>
-              <div className="input-group">
-                <label>SERVER NAME</label>
-                <input required value={name} onChange={e => setName(e.target.value)} placeholder="Enter server name" />
-              </div>
-
-              <div className="input-group">
-                <label>ICON URL (OPTIONAL)</label>
-                <input value={iconUrl} onChange={e => setIconUrl(e.target.value)} placeholder="https://..." />
-              </div>
-
-              <div className="member-select-section">
-                <label>{isEditing ? 'MANAGE MEMBERS' : 'INVITE FRIENDS'}</label>
-                <div className="member-list-scroll">
-                  {friends.map(f => (
-                    <div key={f.id} className="member-select-item">
-                      <span>{f.username}</span>
-                      <input 
-                        type="checkbox" 
-                        checked={selectedFriends.includes(f.id)} 
-                        onChange={() => toggleFriend(f.id)} 
-                      />
+            <div className={`server-panel ${isExpanded ? 'expanded' : ''}`}>
+                <div className="panel-header">
+                    <div onClick={() => setIsExpanded(!isExpanded)} style={{cursor: 'pointer'}}>
+                        <span>SERVERS</span>
+                        <span>{isExpanded ? ' ▼' : ' ▲'}</span>
                     </div>
-                  ))}
+                    <div className="panel-buttons">
+                        {activeServerId && (
+                            <button className="edit-server-btn" onClick={openEditModal} title="Manage Server">⚙️</button>
+                        )}
+                        <button className="add-server-btn" onClick={openCreateModal}>+</button>
+                    </div>
                 </div>
-              </div>
-              <div className="modal-actions">
-                <div className="left-actions">
-                  {isEditing && (
-                      isOwner ? (
-                      <button type="button" className="delete-server-btn" onClick={handleDelete}>
-                        Delete Server
-                      </button>
-                    ) : (
-                      <button type="button" className="leave-server-btn" onClick={handleLeave}>
-                        Leave Server
-                      </button>
-                    )
-                  )}
-                </div>
-                <div className="right-actions">
-                  <button type="button" className="cancel-btn" onClick={() => setShowServerModal(false)}>Back</button>
-                  {isOwner && <button type="submit" className="save-btn">{isEditing ? 'Save Changes' : 'Create'}</button>}
-                </div>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+
+                {isExpanded && (
+                    <div className="server-list">
+                        {servers.map(server => (
+                            <div key={server.id} 
+                                onClick={() => onSelectServer(server.id)} 
+                                className={`server-item ${activeServerId === server.id ? 'active' : ''}`}
+                                title={server.name}>
+                                <div className="server-icon">
+                                    {server.icon_url ? <img src={server.icon_url} alt="" /> : <span>{getServerInitials(server.name)}</span>}
+                                </div>
+                                <div className='server-name'>{server.name}</div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            {/* SERVER MODAL PORTAL */}
+            {showServerModal && createPortal(
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <h3>{isEditing ? 'Manage Server' : 'Create Your Server'}</h3>
+                        <p>{isEditing ? 'Update your server details or member list.' : 'Give your new server a personality.'}</p>
+                        
+                        <form onSubmit={handleSave}>
+                            <div className="input-group">
+                                <label>SERVER NAME</label>
+                                <input required value={name} onChange={e => setName(e.target.value)} placeholder="Enter server name" />
+                            </div>
+
+                            <div className="input-group">
+                                <label>ICON URL (OPTIONAL)</label>
+                                <input value={iconUrl} onChange={e => setIconUrl(e.target.value)} placeholder="https://..." />
+                            </div>
+
+                            <div className="member-select-section">
+                                <label>{isEditing ? 'MANAGE MEMBERS' : 'INVITE FRIENDS'}</label>
+                                <div className="member-list-scroll">
+                                    {friends.map(f => (
+                                        <div key={f.id} className="member-select-item">
+                                            <span>{f.username}</span>
+                                            <input 
+                                                type="checkbox" 
+                                                checked={selectedFriends.includes(f.id)} 
+                                                onChange={() => toggleFriend(f.id)} 
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="modal-actions">
+                                <div className="left-actions">
+                                    {isEditing && (
+                                        isOwner ? (
+                                            <button type="button" className="delete-server-btn" onClick={handleDelete}>
+                                                Delete Server
+                                            </button>
+                                        ) : (
+                                            <button type="button" className="leave-server-btn" onClick={handleLeave}>
+                                                Leave Server
+                                            </button>
+                                        )
+                                    )}
+                                </div>
+                                <div className="right-actions">
+                                    <button type="button" className="cancel-btn" onClick={() => setShowServerModal(false)}>Back</button>
+                                    {isOwner && <button type="submit" className="save-btn">{isEditing ? 'Save Changes' : 'Create'}</button>}
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>,
+                document.body
+            )}
         </div>
     )
 };

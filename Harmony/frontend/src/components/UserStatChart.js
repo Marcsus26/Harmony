@@ -10,7 +10,7 @@ function UserStatsChart({ stats }) {
   const memoizedChart = useMemo(() => {
         if (!stats || stats.length === 0) return null;
   return (
-    <div style={{ width: '100%', height: 200, backgroundColor: '#2f3136', borderRadius: '4px' }}>
+    <div style={{ width: '100%', height: 200, backgroundColor: '#1a1426', borderRadius: '4px' }}>
       <ResponsiveContainer>
         <RadarChart cx="50%" cy="50%" outerRadius="70%" data={stats}>
           <PolarGrid stroke="#4f545c" />
