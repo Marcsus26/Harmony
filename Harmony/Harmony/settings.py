@@ -43,10 +43,12 @@ INSTALLED_APPS = [
     'HarmonyBack.apps.HarmonybackConfig',
     'rest_framework',
     'rest_framework_simplejwt',
-    'frontend.apps.FrontendConfig'
+    'frontend.apps.FrontendConfig',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -133,3 +135,15 @@ REST_FRAMEWORK = {
 }
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+CORS_ALLOW_ALL_ORIGINS = False 
+
+CORS_ALLOWED_ORIGINS = [
+    "https://harmony-app.alwaysdata.net",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://harmony-app.alwaysdata.net",
+]
