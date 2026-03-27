@@ -103,7 +103,7 @@ function RightSidebar({ channels, activeChannelId, onSelectChannel, onChannelCre
   try {
     await api.delete(`/api/servers/${activeServerId}/delete/`);
     
-    setShowModal(false);
+    setShowServerModal(false);
     
     if (onSelectServer) onSelectServer(null);
     
