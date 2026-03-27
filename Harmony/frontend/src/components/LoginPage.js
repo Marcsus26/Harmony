@@ -21,7 +21,7 @@ function Login({ setAuth }) {
     e.preventDefault();
     try {
 
-      const response = await axios.post('http://127.0.0.1:8000/api/login/', formData);
+      const response = await axios.post('https://harmony-app.alwaysdata.net/api/login/', formData);
 
       const { access, refresh } = response.data;
 
