@@ -2,7 +2,7 @@ import React from 'react';
 import '../../static/css/index.css';
 import api from '../api.js';
 
-function GamesSidebar({ suggestedGames, hasSteamLinked, isLoadingSuggestions, onSelectGame, setSuggestedGames }) {
+function GamesSidebar({ suggestedGames, hasSteamLinked, isLoadingSuggestions, onSelectGame, setSuggestedGames, refreshStats, refreshGamesList }) {
 
     const handleRefuse = async (e, gameId) => {
     e.stopPropagation();
@@ -11,8 +11,21 @@ function GamesSidebar({ suggestedGames, hasSteamLinked, isLoadingSuggestions, on
 
     try {
       await api.post('/api/recommendations/refuse/', { game_id: String(gameId) });
+      if (refreshStats) refreshStats();
     } catch (err) {
       console.error("Failed to save refusal", err);
+    }
+    };
+
+    const handleLike = async (e, gameId) => {
+    e.stopPropagation();
+
+    try {
+      await api.post('/api/recommendations/like/', { game_id: String(gameId) });
+      if (refreshStats) refreshStats();
+      if (refreshGamesList) refreshGamesList(); 
+    } catch (err) {
+      console.error("Failed to save like", err);
     }
   };
   return (
@@ -45,7 +58,13 @@ function GamesSidebar({ suggestedGames, hasSteamLinked, isLoadingSuggestions, on
                 onClick={(e) => handleRefuse(e, game.id)}
                 title="Not interested">
                 x
-            </button>
+              </button>
+                            <button 
+                className="like-btn" 
+                onClick={(e) => handleLike(e, game.id)}
+                title="Like this Game">
+                ✓
+              </button>
             </div>
           ))}
         </div>
@@ -53,5 +72,4 @@ function GamesSidebar({ suggestedGames, hasSteamLinked, isLoadingSuggestions, on
     </div>
   );
 }
-
 export default GamesSidebar;

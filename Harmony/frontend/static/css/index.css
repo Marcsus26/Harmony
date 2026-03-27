@@ -803,6 +803,28 @@ body, html {
   background-color: #3b44a3;
 }
 
+.like-btn { 
+  margin-left: auto;/* This pushes the button to the far right */
+  flex-shrink: 0;    /* This prevents the button from becoming an oval if the text is long */
+  background: #0ae81dcc;
+  color: #dbdee1;
+  border: none;
+  border-radius: 4px;
+  width: 24px;       /* Made it slightly bigger for easier clicking */
+  height: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.like-btn:hover {
+  background: hsl(108, 70%, 42%); 
+  color: white;
+}
+
 .refuse-btn {
   margin-left: auto; /* This pushes the button to the far right */
   flex-shrink: 0;    /* This prevents the button from becoming an oval if the text is long */

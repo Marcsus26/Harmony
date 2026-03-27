@@ -2,6 +2,11 @@ import React, {useMemo} from 'react';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer } from 'recharts';
 
 function UserStatsChart({ stats }) {
+
+  const statsSignature = useMemo(() => {
+    return JSON.stringify(stats);
+  }, [stats]);
+  
   const memoizedChart = useMemo(() => {
         if (!stats || stats.length === 0) return null;
   return (
@@ -21,7 +26,7 @@ function UserStatsChart({ stats }) {
       </ResponsiveContainer>
     </div>
   );
-  },[stats]);
+  },[statsSignature]);
   return (
         <div style={{ width: '100%', height: '220px', marginTop: '10px' }}>
             {memoizedChart || <p>Chargement...</p>}

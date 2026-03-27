@@ -1,3 +1,5 @@
+import pandas as pd
+from pathlib import Path
 from django.shortcuts import render
 from django.http import HttpResponse
 from pathlib import Path
@@ -14,6 +16,21 @@ import requests
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.utils import timezone
+
+def get_game_genres(game_id):
+    """Fonction utilitaire pour récupérer la liste des genres d'un jeu depuis le CSV"""
+    csv_path = Path(__file__).resolve().parent / "steamspy_details_cleaned.csv"
+    try:
+        df = pd.read_csv(csv_path)
+        game_row = df[df['appid'] == int(game_id)]
+        if not game_row.empty:
+            genre_str = game_row.iloc[0]['genre']
+            # Retourne une liste de genres, ex: ['Action', 'RPG']
+            return [g.strip() for g in str(genre_str).split(',')]
+    except Exception:
+        pass
+    return []
+
 
 class CurrentUserView(APIView):
     permission_classes = [IsAuthenticated] # Only logged-in users allowed
@@ -200,8 +217,40 @@ class ServerLeaveView(APIView):
             
         except Server.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+class LikeGameView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        game_id = request.data.get('game_id')
+        if not game_id:
+            return Response({"error": "game_id is required"}, status=400)
+            
+        genres = get_game_genres(game_id)
+        profile = request.user.profile
         
+        # Initialise le vecteur s'il est vide
+        if not profile.genre_vector:
+            profile.genre_vector = {}
+        
+        # Transformez le dictionnaire temporairement pour être sûr que Django voit le changement
+        new_vector = dict(profile.genre_vector)
+            
+        # Augmente de +10 le score pour chaque genre
+        for genre in genres:
+            new_vector[genre] = new_vector.get(genre, 0) + 10
+            
+        profile.genre_vector = new_vector
+        profile.save()
+        
+        # (Optionnel) Sauvegarder dans un modèle `LikedGame` si vous voulez garder l'historique
+        
+        return Response({"status": "Game liked", "new_vector": profile.genre_vector}, status=200)
+
 class RefuseGameView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
         game_id = request.data.get('game_id')
         request.user.last_seen = timezone.now()
@@ -209,10 +258,25 @@ class RefuseGameView(APIView):
         if not game_id:
             return Response({"error": "game_id is required"}, status=400)
             
-        # Create the refusal record
+        genres = get_game_genres(game_id)
+        profile = request.user.profile
+        
+        if not profile.genre_vector:
+            profile.genre_vector = {}
+        
+        new_vector = dict(profile.genre_vector)
+            
+        # Diminue de -1 le score pour chaque genre
+        for genre in genres:
+            new_vector[genre] = max(0, new_vector.get(genre, 0) - 10)
+            
+        profile.genre_vector = new_vector
+        profile.save()
+            
         RefusedGame.objects.get_or_create(user=request.user, game_id=str(game_id))
         
-        return Response({"status": "Game dismissed"}, status=200)
+        return Response({"status": "Game dismissed", "new_vector": profile.genre_vector}, status=200)
+
 
 class SteamGameDetailsView(APIView):
     permission_classes = [IsAuthenticated]
@@ -248,33 +312,32 @@ class UserStatsView(APIView):
 
     def get(self, request):
         steam_id = request.user.steam_id
-        request.user.last_seen = timezone.now()
-        request.user.save(update_fields=['last_seen'])
-        if not steam_id:
-            return Response({"detail": "Steam ID manquant"}, status=400)
-
-        csv_path = Path(__file__).resolve().parent / "steamspy_details_cleaned.csv"
-
-        try:
-            # 1. Récupère le dictionnaire des préférences (ex: {'Action': 45.2, 'RPG': 30.1...})
+        profile = request.user.profile
+        
+        # Si le vecteur en BDD est vide, on l'initialise une 1ère fois avec Steam
+        if not profile.genre_vector and steam_id:
+            csv_path = Path(__file__).resolve().parent / "steamspy_details_cleaned.csv"
             prefs = create_user_pref_dict(steam_id, csv_path)
-            
-            if not prefs:
-                return Response([], status=200)
+            profile.genre_vector = prefs
+            profile.save()
 
-            # 2. Formater pour Recharts (Hexagone = 6 genres max)
-            # On prend les 6 premiers et on normalise un peu les noms si besoin
-            radar_data = []
-            for genre, score in list(prefs.items())[:6]:
-                radar_data.append({
-                    "subject": genre,      # Le nom affiché sur la pointe de l'hexagone
-                    "A": round(score, 1),  # La valeur (distance par rapport au centre)
-                    "fullMark": 100        # Référence optionnelle
-                })
+        # Prendre les 6 genres avec les meilleurs scores pour le Radar Chart
+        prefs = profile.genre_vector
+        if not prefs:
+            return Response([], status=200)
 
-            return Response(radar_data, status=200)
-        except Exception as e:
-            return Response({"error": str(e)}, status=500)
+        # Trier le dict par score décroissant et prendre les 6 premiers
+        top_genres = sorted(prefs.items(), key=lambda item: item[1], reverse=True)[:6]
+
+        radar_data = []
+        for genre, score in top_genres:
+            radar_data.append({
+                "subject": genre,
+                "A": round(score, 1),
+                "fullMark": 100
+            })
+
+        return Response(radar_data, status=200)
 
 class SendFriendRequestView(APIView):
     permission_classes = [IsAuthenticated]

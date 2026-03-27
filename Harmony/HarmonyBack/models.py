@@ -20,6 +20,7 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     profile_pic_url = models.URLField(max_length=2000, blank=True)
     bio = models.TextField(max_length=500, blank=True)
+    genre_vector = models.JSONField(default=dict, blank=True)
 
 class Server(models.Model):
     name = models.CharField(max_length=64)

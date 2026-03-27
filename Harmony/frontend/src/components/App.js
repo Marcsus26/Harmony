@@ -32,6 +32,53 @@ function App() {
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [suggestionsRefreshKey, setSuggestionsRefreshKey] = useState(0);
 
+  const fetchStats = async () => {
+    try {
+      const response = await api.get('/api/recommendations/stats/'); // Ton endpoint Django
+      setUserStats(response.data);
+    } catch (error) {
+      console.error("Erreur stats:", error);
+    }
+  };
+
+  const fetchSuggestions = async () => {
+  if (!localStorage.getItem('access_token')) {
+    setSuggestedGames([]);
+    setHasSteamLinked(false);
+    return;
+  }
+
+  try {
+    setIsLoadingSuggestions(true);
+    const meResponse = await api.get('/api/auth/me/');
+    const steamId = meResponse.data?.steam_id;
+
+    if (!steamId) {
+      setHasSteamLinked(false);
+      setSuggestedGames([]);
+      return;
+    }
+
+    setHasSteamLinked(true);
+    const response = await api.get('/api/games/suggestions/');
+    const games = (response.data?.results || []).map((game) => ({
+      id: game.appid,
+      title: game.name,
+      img: game.appid
+        ? `https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/header.jpg`
+        : logo,
+      genre: game.genre,
+    }));
+    games.sort(() => Math.random() - 0.5);
+    setSuggestedGames(games);
+  } catch (error) {
+    console.error('Failed to fetch game suggestions', error);
+    setSuggestedGames([]);
+  } finally {
+    setIsLoadingSuggestions(false);
+  }
+};
+
   useEffect(() => {
     const fetchFriends = async () => {
       try {
@@ -63,15 +110,7 @@ function App() {
   }, [isAuthenticated]);
 
   useEffect(() => {
-      const fetchStats = async () => {
-          try {
-              const response = await api.get('/api/recommendations/stats/'); // Ton endpoint Django
-              setUserStats(response.data);
-          } catch (error) {
-              console.error("Erreur stats:", error);
-          }
-      };
-      if (isAuthenticated) fetchStats();
+    if (isAuthenticated) fetchStats();
   }, [isAuthenticated]);
 
 
@@ -192,6 +231,13 @@ function App() {
      fetchCurrentUser();
   }, [isAuthenticated])
 
+  useEffect(() => {
+    // Si l'utilisateur est connecté, alié Steam, et qu'il n'y a plus de jeu, on refresh
+    if (isAuthenticated && hasSteamLinked && suggestedGames.length === 0 && !isLoadingSuggestions) {
+       setSuggestionsRefreshKey((prev) => prev + 1);
+    }
+  }, [suggestedGames.length]);
+
   return (
     <Router>
         <Routes>
@@ -208,6 +254,8 @@ function App() {
                   hasSteamLinked={hasSteamLinked}
                   isLoadingSuggestions={isLoadingSuggestions}
                   onSelectGame={(id) => setActiveSteamGameId(id)}
+                  refreshStats={fetchStats} 
+                  refreshGamesList={fetchSuggestions} 
                 />
 
                 <SteamView 
