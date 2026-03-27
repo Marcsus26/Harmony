@@ -128,6 +128,9 @@ function ChatArea({ messages, activeChannelId, onMessageSent }) {
           </form>
         )}
       </div>
+      {!activeChannelId || messages.length === 0 &&
+          <h1 className='welcome'>WELCOME TO HARMONY</h1>
+        }
     </div>
   );
 };

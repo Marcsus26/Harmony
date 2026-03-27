@@ -20,6 +20,25 @@ function SidebarDivider({ label }) {
 function SuggestedFriendItem({ id, username, similarity_score, avatar, is_online }) {
     // Si l'utilisateur n'a pas d'avatar, on met le logo par défaut
     const avatarSrc = avatar ? avatar : logo;
+    
+    // State to handle the button feedback ('idle', 'loading', 'sent', 'error')
+    const [requestStatus, setRequestStatus] = useState('idle');
+
+    const handleAddFriend = async (e) => {
+        e.stopPropagation(); // Prevents triggering any parent onClick events if you add them later
+        if (requestStatus === 'sent' || requestStatus === 'loading') return;
+
+        setRequestStatus('loading');
+        try {
+            await api.post('/api/friends/send/', { username: username });
+            setRequestStatus('sent');
+        } catch (err) {
+            console.error("Failed to send request", err);
+            setRequestStatus('error');
+            // Revert back to the + button after 3 seconds if it failed
+            setTimeout(() => setRequestStatus('idle'), 3000);
+        }
+    };
 
     return (
         <div className="sidebar-item suggestion">
@@ -31,8 +50,19 @@ function SuggestedFriendItem({ id, username, similarity_score, avatar, is_online
                 <span className="username">{username}</span>
                 <span className="current-game">Affinité du moment : {similarity_score}%</span>
             </div>
-            {/* L'action pour ajouter en ami pourra être branchée ici plus tard */}
-            <button className="add-friend-btn">+</button>
+            
+            <button 
+                className="add-friend-btn" 
+                onClick={handleAddFriend}
+                disabled={requestStatus === 'sent' || requestStatus === 'loading'}
+                style={{
+                    color: requestStatus === 'sent' ? '#23a55a' : requestStatus === 'error' ? '#f23f42' : '',
+                    cursor: requestStatus === 'sent' ? 'default' : 'pointer'
+                }}
+                title="Send Friend Request"
+            >
+                {requestStatus === 'loading' ? '...' : requestStatus === 'sent' ? '✓' : requestStatus === 'error' ? '✖' : '+'}
+            </button>
         </div>
     )
 };
@@ -180,7 +210,7 @@ function Sidebar({ friends, currentUser, userStats, friendsStats }) {
     <div className="sidebar">
       <div className="top-sections">
         <div className="friends-section">
-          <p className="sidebar-label">DIRECT MESSAGES</p>
+          <p className="sidebar-label">YOUR FRIENDS</p>
           {friends.map(f => <FriendItem key={f.id} 
           name={f.username} 
           status={f.is_online} 

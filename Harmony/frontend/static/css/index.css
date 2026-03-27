@@ -1051,3 +1051,15 @@ body, html {
     align-items: center;
     min-height: 300px;
 }
+
+.welcome {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Pulls it back perfectly to the true center */
+  margin: 0;
+  color: #f2f3f5; /* Making sure it stands out against the dark background */
+  letter-spacing: 2px;
+  text-align: center; /* Adds a little extra space-theme flair */
+  opacity: 0.7;
+}
