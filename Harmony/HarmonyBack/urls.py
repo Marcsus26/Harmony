@@ -29,6 +29,4 @@ urlpatterns = [
     path('friends/list/', FriendsListView.as_view(), name='friends-list'),
     path('recommendations/friends-stats/', FriendsUserStatsView.as_view(), name='friend-stats'),
     path('players/suggested/', SuggestedPlayersView.as_view(), name='suggested_players'),
-    path('recommendations/friends-stats/', FriendsUserStatsView.as_view(), name='friend-stats'),
-    path('players/suggested/', SuggestedPlayersView.as_view(), name='suggested_players'),
 ]
