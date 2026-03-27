@@ -249,6 +249,37 @@ class LikeGameView(APIView):
         
         return Response({"status": "Game liked", "new_vector": profile.genre_vector}, status=200)
 
+
+
+class LikeGameView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        game_id = request.data.get('game_id')
+        if not game_id:
+            return Response({"error": "game_id is required"}, status=400)
+            
+        genres = get_game_genres(game_id)
+        profile = request.user.profile
+        
+        # Initialise le vecteur s'il est vide
+        if not profile.genre_vector:
+            profile.genre_vector = {}
+        
+        # Transformez le dictionnaire temporairement pour être sûr que Django voit le changement
+        new_vector = dict(profile.genre_vector)
+            
+        # Augmente de +10 le score pour chaque genre
+        for genre in genres:
+            new_vector[genre] = new_vector.get(genre, 0) + 10
+            
+        profile.genre_vector = new_vector
+        profile.save()
+        
+        # (Optionnel) Sauvegarder dans un modèle `LikedGame` si vous voulez garder l'historique
+        
+        return Response({"status": "Game liked", "new_vector": profile.genre_vector}, status=200)
+
 class RefuseGameView(APIView):
     permission_classes = [IsAuthenticated]
 
