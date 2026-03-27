@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://127.0.0.1:8000',
+  baseURL: 'https://harmony-app.alwaysdata.net',
 });
 
 // Step 1: Attach the Access Token to every request automatically
@@ -25,7 +25,7 @@ api.interceptors.response.use(
 
       if (refreshToken) {
         try {
-          const response = await axios.post('http://127.0.0.1:8000/api/auth/refresh/', {
+          const response = await axios.post('https://harmony-app.alwaysdata.net/api/auth/refresh/', {
             refresh: refreshToken,
           });
 
