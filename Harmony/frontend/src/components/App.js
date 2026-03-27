@@ -25,6 +25,7 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [activeSteamGameId, setActiveSteamGameId] = useState(null);
   const [userStats, setUserStats] = useState([]);
+  const [friendsStats, setFriendsStats] = useState([]);
   const [friends, setFriends] = useState([]);
   const [suggestedGames, setSuggestedGames] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('access_token'));
@@ -113,6 +114,17 @@ function App() {
     if (isAuthenticated) fetchStats();
   }, [isAuthenticated]);
 
+  useEffect(() => {
+      const fetchFriendsStats = async () => {
+          try {
+              const response = await api.get('/api/recommendations/friends-stats/'); // Ton endpoint Django
+              setFriendsStats(response.data);
+          } catch (error) {
+              console.error("Erreur stats:", error);
+          }
+      };
+      if (isAuthenticated) fetchFriendsStats();
+  }, [isAuthenticated]);
 
   useEffect(() => {
     if (activeServerId) {
@@ -247,6 +259,7 @@ function App() {
               <div className="app-container">
                 <Sidebar friends={friends}
                 currentUser={user}
+                friendsStats={friendsStats}
                 userStats={userStats}/>
                 <GamesSidebar 
                   suggestedGames={suggestedGames}
