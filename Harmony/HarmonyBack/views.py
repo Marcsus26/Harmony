@@ -16,6 +16,8 @@ import requests
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.utils import timezone
+from .suggestion_players import get_recently_played_games, calculate_player_similarity
+from django.db.models import Q
 
 def get_game_genres(game_id):
     """Fonction utilitaire pour récupérer la liste des genres d'un jeu depuis le CSV"""
@@ -30,7 +32,6 @@ def get_game_genres(game_id):
     except Exception:
         pass
     return []
-
 
 class CurrentUserView(APIView):
     permission_classes = [IsAuthenticated] # Only logged-in users allowed
@@ -464,3 +465,43 @@ class FriendsUserStatsView(APIView):
             return Response(radar_data_all, status=200)
         except Exception as e:
             return Response({"error": str(e)}, status=500)
+    
+class SuggestedPlayersView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        # 1. Mettre a jour l'activite de l'utilisateur
+        request.user.last_seen = timezone.now()
+        request.user.save(update_fields=['last_seen'])
+
+        # 2. Recuperer les jeux recents du demandeur
+        my_steam_id = request.user.steam_id
+        if not my_steam_id:
+            return Response({"detail": "Liez votre compte Steam pour voir des suggestions."}, status=400)
+            
+        my_recent_games = get_recently_played_games(my_steam_id)
+
+        # 3. Identifier les exclus (soi-meme + amis actuels)
+        friend_ids = request.user.friends.values_list('id', flat=True)
+        exclude_ids = list(friend_ids) + [request.user.id]
+
+        # 4. Recuperer les autres utilisateurs ayant un Steam ID
+        potential_matches = User.objects.exclude(id__in=exclude_ids).exclude(steam_id__isnull=True).exclude(steam_id="")
+
+        suggestions = []
+        for candidate in potential_matches:
+            candidate_games = get_recently_played_games(candidate.steam_id)
+            score = calculate_player_similarity(my_recent_games, candidate_games)
+            
+            suggestions.append({
+                "id": candidate.id,
+                "username": candidate.username,
+                "avatar": candidate.profile.profile_pic_url,
+                "is_online": candidate.is_online,
+                "similarity_score": round(score * 100, 2) # Score en pourcentage
+            })
+
+        # 5. Tri : Online d'abord (True > False), puis Score decroissant
+        suggestions.sort(key=lambda x: (x['is_online'], x['similarity_score']), reverse=True)
+
+        return Response(suggestions[:5]) # (limité à 5)

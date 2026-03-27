@@ -17,17 +17,21 @@ function SidebarDivider({ label }) {
 };
 
 // Suggestion Item: Shows the users that "interest" the user
-function SuggestedFriendItem({ name, game, avatar }) {
+function SuggestedFriendItem({ id, username, similarity_score, avatar, is_online }) {
+    // Si l'utilisateur n'a pas d'avatar, on met le logo par défaut
+    const avatarSrc = avatar ? avatar : logo;
+
     return (
         <div className="sidebar-item suggestion">
             <div className="avatar-wrapper">
-            <img src={avatar} className="sidebar-avatar" alt={name} />
-            <div className="status-dot online"></div>
+                <img src={avatarSrc} className="sidebar-avatar" alt={username} />
+                <div className={`status-dot ${is_online ? 'online' : 'offline'}`}></div>
             </div>
             <div className="item-details">
-            <span className="username">{name}</span>
-            <span className="current-game">Playing: {game}</span>
+                <span className="username">{username}</span>
+                <span className="current-game">Affinité du moment : {similarity_score}%</span>
             </div>
+            {/* L'action pour ajouter en ami pourra être branchée ici plus tard */}
             <button className="add-friend-btn">+</button>
         </div>
     )
@@ -118,12 +122,8 @@ function AddFriendModal({ isOpen, onClose }) {
 }
 
 function Sidebar({ friends, currentUser, userStats, friendsStats }) {
-
-  // Fake suggestions data
-  const suggestions = [
-    { id: 101, name: "Slayer_X", game: "Counter-Strike 2", avatar: logo },
-    { id: 102, name: "DotaQueen", game: "Dota 2", avatar: logo },
-  ];
+// 1. On remplace les fausses données par un state vide
+  const [suggestions, setSuggestions] = useState([]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFriend, setSelectedFriend] = useState(null);
@@ -142,14 +142,28 @@ function Sidebar({ friends, currentUser, userStats, friendsStats }) {
       }
     }
   }
-
   const [isRequestsOpen, setIsRequestsOpen] = useState(false);
   const [requestCount, setRequestCount] = useState(0);
+
+  // 2. On crée un useEffect pour récupérer les suggestions au chargement
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      try {
+        const res = await api.get('/api/players/suggested/');
+        setSuggestions(res.data);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des suggestions:", error);
+      }
+    };
+    
+    fetchSuggestions();
+  }, []); // Le tableau vide indique que ça s'exécute une seule fois au montage
 
   const checkCount = async () => {
       const res = await api.get('/api/friends/pending/');
       setRequestCount(res.data.length);
-    };
+  };
+
   // Poll for request count every minute
   useEffect(() => {
     checkCount();
