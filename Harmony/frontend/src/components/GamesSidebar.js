@@ -59,7 +59,7 @@ function GamesSidebar({ suggestedGames, hasSteamLinked, isLoadingSuggestions, on
                 title="Not interested">
                 x
               </button>
-                            <button 
+              <button 
                 className="like-btn" 
                 onClick={(e) => handleLike(e, game.id)}
                 title="Like this Game">

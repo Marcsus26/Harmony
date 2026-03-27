@@ -742,6 +742,7 @@ body, html {
 .game-info {
   display: flex;
   flex-direction: column;
+  flex: 1;
 }
 
 .game-title {
@@ -826,7 +827,7 @@ body, html {
 }
 
 .refuse-btn {
-  margin-left: auto; /* This pushes the button to the far right */
+  margin-left: 8px; /* This pushes the button to the far right */
   flex-shrink: 0;    /* This prevents the button from becoming an oval if the text is long */
   background: rgba(202, 13, 13, 0.8);
   color: #dbdee1;
