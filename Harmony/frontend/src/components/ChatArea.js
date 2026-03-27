@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import api from '../api.js';
 import EmojiPicker from 'emoji-picker-react';
+import logo from '../../static/images/logo.svg';
 import '../../static/css/index.css';
 
 function ChatArea({ messages, activeChannelId, onMessageSent }) {
@@ -86,11 +87,11 @@ function ChatArea({ messages, activeChannelId, onMessageSent }) {
         <div className="message-list" ref={scrollableContainerRef}>
           {messages.map((msg) => (
           <div className="discord-message">
-            <img src={msg.author_avatar} alt="avatar" className="avatar" />
+            <img src={msg.author_avatar === '' ? logo : msg.author_avatar} alt="avatar" className="avatar" />
             <div className="message-content">
               <div className="message-header">
                 <span className="username">{msg.author_name}</span>
-                <span className="timestamp">{new Date(msg.timestamp).toLocaleTimeString()}</span>
+                <span className="timestamp">{new Date(msg.timestamp).toLocaleString()}</span>
               </div>
               <div className="text">{msg.content}</div>
             </div>
@@ -127,6 +128,9 @@ function ChatArea({ messages, activeChannelId, onMessageSent }) {
           </form>
         )}
       </div>
+      {!activeChannelId || messages.length === 0 &&
+          <h1 className='welcome'>WELCOME TO HARMONY</h1>
+        }
     </div>
   );
 };

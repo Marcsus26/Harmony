@@ -1,15 +1,26 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
+from django.utils import timezone
+from datetime import timedelta
 
 class User(AbstractUser):
-    steam_id = models.BigIntegerField(unique=True, null=True, blank=True)
+    steam_id = models.CharField(max_length=40, unique=True, null=True, blank=True)
     friends = models.ManyToManyField("self", symmetrical=True, blank=True)
+    last_seen = models.DateTimeField(null=True, blank=True)
+
+    @property
+    def is_online(self):
+        if self.last_seen:
+            # If the user was active in the last 5 minutes, consider them online
+            return self.last_seen > timezone.now() - timedelta(minutes=5)
+        return False
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     profile_pic_url = models.URLField(max_length=2000, blank=True)
     bio = models.TextField(max_length=500, blank=True)
+    genre_vector = models.JSONField(default=dict, blank=True)
 
 class Server(models.Model):
     name = models.CharField(max_length=64)
@@ -32,6 +43,13 @@ class Message(models.Model):
         ordering = ['timestamp']
 
 class FriendRequest(models.Model):
+    STATUS_CHOICES = (
+        (1, 'Pending'),
+        (2, 'Accepted'),
+        (3, 'Rejected'),
+    )
+    
+    status = models.IntegerField(choices=STATUS_CHOICES, default=1)
     from_user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='sent_requests'
     )
@@ -46,3 +64,12 @@ class FriendRequest(models.Model):
 
     def __str__(self):
         return f"{self.from_user} to {self.to_user}"
+
+class RefusedGame(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="refused_games")
+    # Use CharField for game_id to avoid the JavaScript "Large Integer" rounding bug!
+    game_id = models.CharField(max_length=255) 
+    refused_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'game_id')

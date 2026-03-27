@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import '../../static/css/index.css';
 import logo from "../../static/images/logo.svg";
 import api from '../api.js';
+import UserStatsChart from './UserStatChart.js';
+import PendingRequestsModal from './PendingRequests.js';
 
 // A simple divider component for the sidebar
 function SidebarDivider({ label }) {
@@ -14,213 +16,238 @@ function SidebarDivider({ label }) {
     )
 };
 
-// Suggestion Item: Shows the game that "interests" the user
-function SuggestedFriendItem({ name, game, avatar }) {
+// Suggestion Item: Shows the users that "interest" the user
+function SuggestedFriendItem({ id, username, similarity_score, avatar, is_online }) {
+    // Si l'utilisateur n'a pas d'avatar, on met le logo par défaut
+    const avatarSrc = avatar ? avatar : logo;
+    
+    // State to handle the button feedback ('idle', 'loading', 'sent', 'error')
+    const [requestStatus, setRequestStatus] = useState('idle');
+
+    const handleAddFriend = async (e) => {
+        e.stopPropagation(); // Prevents triggering any parent onClick events if you add them later
+        if (requestStatus === 'sent' || requestStatus === 'loading') return;
+
+        setRequestStatus('loading');
+        try {
+            await api.post('/api/friends/send/', { username: username });
+            setRequestStatus('sent');
+        } catch (err) {
+            console.error("Failed to send request", err);
+            setRequestStatus('error');
+            // Revert back to the + button after 3 seconds if it failed
+            setTimeout(() => setRequestStatus('idle'), 3000);
+        }
+    };
+
     return (
         <div className="sidebar-item suggestion">
             <div className="avatar-wrapper">
-            <img src={avatar} className="sidebar-avatar" alt={name} />
-            <div className="status-dot online"></div>
+                <img src={avatarSrc} className="sidebar-avatar" alt={username} />
+                <div className={`status-dot ${is_online ? 'online' : 'offline'}`}></div>
             </div>
             <div className="item-details">
-            <span className="username">{name}</span>
-            <span className="current-game">Playing: {game}</span>
+                <span className="username">{username}</span>
+                <span className="current-game">Affinité du moment : {similarity_score}%</span>
             </div>
-            <button className="add-friend-btn">+</button>
+            
+            <button 
+                className="add-friend-btn" 
+                onClick={handleAddFriend}
+                disabled={requestStatus === 'sent' || requestStatus === 'loading'}
+                style={{
+                    color: requestStatus === 'sent' ? '#23a55a' : requestStatus === 'error' ? '#f23f42' : '',
+                    cursor: requestStatus === 'sent' ? 'default' : 'pointer'
+                }}
+                title="Send Friend Request"
+            >
+                {requestStatus === 'loading' ? '...' : requestStatus === 'sent' ? '✓' : requestStatus === 'error' ? '✖' : '+'}
+            </button>
         </div>
     )
 };
 
-// A single Friend row in the sidebar
-function FriendItem({ name, status, avatar }) {
+function FriendStatsModal({ isOpen, onClose, friendName, stats, bio }) {
+    if (!isOpen) return null;
+
     return (
-        <div className="sidebar-item">
+        <div className="modal-overlay" onClick={onClose}>
+            <div className="stats-modal-content" onClick={e => e.stopPropagation()}>
+                <div className="modal-header">
+                    <h3>{friendName}'s Gaming Profile</h3>
+                    <button className="close-x" onClick={onClose}>✕</button>
+                </div>
+                <div className="modal-body">
+                    {stats ? (
+                        <UserStatsChart stats={stats} />
+                    ) : (
+                        <p className="no-data">No stats available for this user.</p>
+                    )}
+                    <div className="modal-header">
+                      {friendName}'s bio :
+                      <br/>
+                    </div>
+                    {bio}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function FriendItem({ name, status, avatar, onClick }) {
+    return (
+        <div className="sidebar-item friend-row" onClick={onClick}>
             <div className="avatar-wrapper">
-            <img src={avatar} className="sidebar-avatar" alt={name} />
-            <div className={`status-dot ${status}`}></div>
+                <img src={avatar} className="sidebar-avatar" alt={name} />
+                <div className={`status-dot ${status ? 'online' : 'offline'}`}></div>
             </div>
             <span>{name}</span>
+            <div className="view-stats-hint">View Stats</div>
         </div>
-    )
-};
-
-// A single Server row in the panel
-function ServerItem({ icon, name }) {
-    return (
-        <div className="server-item">
-        <div className="server-icon">{icon}</div>
-        <span>{name}</span>
-        </div>
-    )
-};
-
-function Sidebar({ friends, servers, onServerCreated, activeServerId, onSelectServer }) {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const [name, setName] = useState('');
-  const [iconUrl, setIconUrl] = useState('');
-  const [selectedFriends, setSelectedFriends] = useState([]);
-  const [isEditing, setIsEditing] = useState(false);
-
-  const currentServer = servers.find(s => s.id === activeServerId);
-
-  const toggleFriend = (id) => {
-    setSelectedFriends(prev => 
-      prev.includes(id) ? prev.filter(fid => fid !== id) : [...prev, id]
     );
-  };
+};
 
-  const openCreateModal = () => {
-    setIsEditing(false);
-    setName('');
-    setIconUrl('');
-    setSelectedFriends([]);
-    setShowModal(true);
-  };
+function AddFriendModal({ isOpen, onClose }) {
+  const [username, setUsername] = useState('');
+  const [message, setMessage] = useState({ text: '', type: '' });
 
-
-  const openEditModal = () => {
-    if (!currentServer) return;
-    setIsEditing(true);
-    setName(currentServer.name);
-    setIconUrl(currentServer.icon_url || '');
-    setSelectedFriends(currentServer.users || []); 
-    setShowModal(true);
-  };
-
-  const handleSave = async (e) => {
-    e.preventDefault();
+  const handleSendRequest = async () => {
     try {
-      if (isEditing) {
-        await api.patch(`/api/servers/${activeServerId}/update-members/`, {
-          users: selectedFriends,
-          name: name,
-          icon_url: iconUrl
-        });
-      } else {
-        // POST new server
-        await api.post('/api/servers/create/', {
-          name: name,
-          icon_url: iconUrl,
-          users: selectedFriends
-        });
-      }
-      
-      setShowModal(false);
-      if (onServerCreated) onServerCreated(); // Refresh the list
+      const response = await api.post('/api/friends/send/', { username });
+      setMessage({ text: response.data.message, type: 'success' });
+      setUsername('');
+      setTimeout(onClose, 1500);
     } catch (err) {
-      alert(isEditing ? "Failed to update server" : "Failed to create server");
+      const errorMsg = err.response?.data?.error || "Something went wrong";
+      setMessage({ text: errorMsg, type: 'error' });
     }
   };
 
-  // Sort friends so online ones are at the top
-  const sortedFriends = [...friends].sort((a, b) => 
-    a.status === 'online' ? -1 : 1
-  );
-  // Fake suggestions data
-  const suggestions = [
-    { id: 101, name: "Slayer_X", game: "Counter-Strike 2", avatar: logo },
-    { id: 102, name: "DotaQueen", game: "Dota 2", avatar: logo },
-  ];
+  if (!isOpen) return null;
 
-  const getServerInitials = (name) => {
-  return name
-    .split(' ')
-    .map(word => word[0])
-    .join('')
-    .substring(0, 3)
-    .toUpperCase();
+  return (
+    <div className="modal-overlay">
+      <div className="friend-modal">
+        <h3>Add a Friend</h3>
+        <p>Enter their username to send a request.</p>
+        
+        <input 
+          type="text" 
+          placeholder="Username..." 
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
+
+        {message.text && (
+          <div className={`message ${message.type}`}>{message.text}</div>
+        )}
+
+        <div className="friend-modal-actions">
+          <button onClick={onClose} className="cancel-btn">Cancel</button>
+          <button onClick={handleSendRequest} className="send-btn">Send Request</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Sidebar({ friends, currentUser, userStats, friendsStats }) {
+// 1. On remplace les fausses données par un state vide
+  const [suggestions, setSuggestions] = useState([]);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedFriend, setSelectedFriend] = useState(null);
+  const [isStatsModalOpen, setIsStatsModalOpen] = useState(false);
+
+  const handleFriendClick = (friend) => {
+      const stats = findFriendStats(friend.id);
+      setSelectedFriend({ ...friend, stats });
+      setIsStatsModalOpen(true);
+    };
+
+  const findFriendStats = (id) => {
+    for (let i = 0; i< friendsStats.length; i++) {
+      if (friendsStats[i][friendsStats[i].length - 1].id === id) {
+        return friendsStats[i].slice(0, 6);
+      }
+    }
+  }
+  const [isRequestsOpen, setIsRequestsOpen] = useState(false);
+  const [requestCount, setRequestCount] = useState(0);
+
+  // 2. On crée un useEffect pour récupérer les suggestions au chargement
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      try {
+        const res = await api.get('/api/players/suggested/');
+        setSuggestions(res.data);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des suggestions:", error);
+      }
+    };
+    
+    fetchSuggestions();
+  }, []); // Le tableau vide indique que ça s'exécute une seule fois au montage
+
+  const checkCount = async () => {
+      const res = await api.get('/api/friends/pending/');
+      setRequestCount(res.data.length);
   };
 
+  // Poll for request count every minute
   useEffect(() => {
-    onServerCreated();
+    checkCount();
+    const interval = setInterval(checkCount, 60000);
+    return () => clearInterval(interval);
   }, []);
+
+  function handleRequestsClose() {
+    setIsRequestsOpen(false); 
+    checkCount();
+  }
 
   return (
     <div className="sidebar">
       <div className="top-sections">
         <div className="friends-section">
-          <p className="sidebar-label">DIRECT MESSAGES</p>
-          {sortedFriends.map(f => <FriendItem key={f.id} {...f} />)}
+          <p className="sidebar-label">YOUR FRIENDS</p>
+          {friends.map(f => <FriendItem key={f.id} 
+          name={f.username} 
+          status={f.is_online} 
+          avatar={f.avatar === '' ? logo : f.avatar}
+          onClick={() => handleFriendClick(f)}/>)}
         </div>
         <SidebarDivider label="SUGGESTED PLAYERS" />
 
         <div className="suggestions-section">
           {suggestions.map(s => <SuggestedFriendItem key={s.id} {...s} />)}
         </div>
+
+        {/* NOUVELLE SECTION : Statistiques Hexagonales */}
+            <div className="panel stats-panel">
+                <p className="sidebar-label">YOUR GAMING PROFILE</p>
+                <UserStatsChart stats={userStats} />
+            </div>
       </div>
-      <div className={`server-panel ${isExpanded ? 'expanded' : ''}`}>
-        <div className="panel-header">
-          <div onClick={() => setIsExpanded(!isExpanded)} style={{cursor: 'pointer'}}>
-            <span>SERVERS</span>
-            <span>{isExpanded ? ' ▼' : ' ▲'}</span>
-          </div>
-          <div className="panel-buttons">
-            {activeServerId && (
-              <button className="edit-server-btn" onClick={openEditModal} title="Manage Server">⚙️</button>
-            )}
-            <button className="add-server-btn" onClick={openCreateModal}>+</button>
-          </div>
-        </div>
-
-        {isExpanded && (
-          <div className="server-list">
-            {servers.map(server => (
-              <div key={server.id} 
-                onClick={() => onSelectServer(server.id)} 
-                className={`server-item ${activeServerId === server.id ? 'active' : ''}`}
-                title={server.name}>
-                <div className="server-icon">
-                  {server.icon_url ? <img src={server.icon_url} alt="" /> : <span>{getServerInitials(server.name)}</span>}
-                </div>
-                <div className='server-name'>{server.name}</div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {showModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h3>{isEditing ? 'Manage Server' : 'Create Your Server'}</h3>
-            <p>{isEditing ? 'Update your server details or member list.' : 'Give your new server a personality.'}</p>
-            
-            <form onSubmit={handleSave}>
-              <div className="input-group">
-                <label>SERVER NAME</label>
-                <input required value={name} onChange={e => setName(e.target.value)} placeholder="Enter server name" />
-              </div>
-
-              <div className="input-group">
-                <label>ICON URL (OPTIONAL)</label>
-                <input value={iconUrl} onChange={e => setIconUrl(e.target.value)} placeholder="https://..." />
-              </div>
-
-              <div className="member-select-section">
-                <label>{isEditing ? 'MANAGE MEMBERS' : 'INVITE FRIENDS'}</label>
-                <div className="member-list-scroll">
-                  {friends.map(f => (
-                    <div key={f.id} className="member-select-item">
-                      <span>{f.name}</span>
-                      <input 
-                        type="checkbox" 
-                        checked={selectedFriends.includes(f.id)} 
-                        onChange={() => toggleFriend(f.id)} 
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="modal-actions">
-                <button type="button" className="cancel-btn" onClick={() => setShowModal(false)}>Back</button>
-                <button type="submit" className="save-btn">{isEditing ? 'Save Changes' : 'Create'}</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <FriendStatsModal 
+        isOpen={isStatsModalOpen} 
+        onClose={() => setIsStatsModalOpen(false)}
+        friendName={selectedFriend?.username}
+        stats={selectedFriend?.stats}
+        bio={selectedFriend?.bio}
+      />
+      <button className="add-friend-trigger" onClick={() => setIsModalOpen(true)}>
+            + Add Friend
+      </button>
+      <button className="add-friend-trigger" onClick={() => setIsRequestsOpen(true)}>
+        Friend Requests
+        {requestCount > 0 && <span className="badge">{requestCount}</span>}
+      </button>
+      <PendingRequestsModal isOpen={isRequestsOpen} onClose={handleRequestsClose} />
+      <AddFriendModal 
+      isOpen={isModalOpen} 
+      onClose={() => setIsModalOpen(false)} 
+    />
     </div>
   );
 };

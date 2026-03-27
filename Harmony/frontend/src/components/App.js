@@ -13,6 +13,8 @@ import ProtectedRoute from './ProtectedRoute.jsx';
 import Register from "./Register.js";
 import MyProfile from "./MyProfile.js";
 import api from "../api.js";
+import GamesSidebar from "./GamesSidebar.js";
+import SteamView from "./SteamView.js";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -21,21 +23,84 @@ function App() {
   const [channels, setChannels] = useState([]);
   const [activeChannelId, setActiveChannelId] = useState(null);
   const [messages, setMessages] = useState([]);
-
-  const friends = [
-    { id: 1, name: "Nelly", status: "online", avatar: logo },
-    { id: 2, name: "User123", status: "offline", avatar: logo },
-    { id: 3, name: "CodingWizard", status: "online", avatar: logo },
-    { id: 4, name: "Gamer99", status: "online", avatar: logo },
-  ];
-
+  const [activeSteamGameId, setActiveSteamGameId] = useState(null);
+  const [userStats, setUserStats] = useState([]);
+  const [friendsStats, setFriendsStats] = useState([]);
+  const [friends, setFriends] = useState([]);
   const [suggestedGames, setSuggestedGames] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('access_token'));
+  const [hasSteamLinked, setHasSteamLinked] = useState(false);
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+  const [suggestionsRefreshKey, setSuggestionsRefreshKey] = useState(0);
+
+  const fetchStats = async () => {
+    try {
+      const response = await api.get('/api/recommendations/stats/'); // Ton endpoint Django
+      setUserStats(response.data);
+    } catch (error) {
+      console.error("Erreur stats:", error);
+    }
+  };
+
+  const fetchSuggestions = async () => {
+  if (!localStorage.getItem('access_token')) {
+    setSuggestedGames([]);
+    setHasSteamLinked(false);
+    return;
+  }
+
+  try {
+    setIsLoadingSuggestions(true);
+    const meResponse = await api.get('/api/auth/me/');
+    const steamId = meResponse.data?.steam_id;
+
+    if (!steamId) {
+      setHasSteamLinked(false);
+      setSuggestedGames([]);
+      return;
+    }
+
+    setHasSteamLinked(true);
+    const response = await api.get('/api/games/suggestions/');
+    const games = (response.data?.results || []).map((game) => ({
+      id: game.appid,
+      title: game.name,
+      img: game.appid
+        ? `https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/header.jpg`
+        : logo,
+      genre: game.genre,
+    }));
+    games.sort(() => Math.random() - 0.5);
+    setSuggestedGames(games);
+  } catch (error) {
+    console.error('Failed to fetch game suggestions', error);
+    setSuggestedGames([]);
+  } finally {
+    setIsLoadingSuggestions(false);
+  }
+};
+
+  useEffect(() => {
+    const fetchFriends = async () => {
+      try {
+        const response = await api.get('/api/friends/list/');
+        setFriends(response.data);
+      } catch (err) {
+        console.error("Could not fetch friends", err);
+      }
+    };
+    fetchFriends();
+    const interval = setInterval(() => {
+      fetchFriends();
+    }, 30000); 
+    return () => clearInterval(interval);
+  }, [isAuthenticated]);
 
   const loadServers = async () => {
     try {
       const serverRes = await api.get('/api/servers/my-servers/');
       setServers(serverRes.data);
+      fetchChannels();
     } catch (err) {
       console.error("Error loading servers:", err);
     }
@@ -43,7 +108,23 @@ function App() {
 
   useEffect(() => {
     loadServers();
-  }, []);
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (isAuthenticated) fetchStats();
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+      const fetchFriendsStats = async () => {
+          try {
+              const response = await api.get('/api/recommendations/friends-stats/'); // Ton endpoint Django
+              setFriendsStats(response.data);
+          } catch (error) {
+              console.error("Erreur stats:", error);
+          }
+      };
+      if (isAuthenticated) fetchFriendsStats();
+  }, [isAuthenticated]);
 
   useEffect(() => {
     if (activeServerId) {
@@ -57,7 +138,7 @@ function App() {
       };
       fetchChannels();
     }
-  }, [activeServerId]);
+  }, [activeServerId, isAuthenticated]);
 
   useEffect(() => {
     if (servers.length > 0) {
@@ -72,7 +153,7 @@ function App() {
     setActiveChannelId(null);
     setMessages([]);
   }
-  }, [channels]);
+  }, [channels, isAuthenticated]);
 
   useEffect(() => {
   if (activeChannelId) {
@@ -86,7 +167,7 @@ function App() {
     };
     fetchMessagesOG();
   }
-  }, [activeChannelId]);
+  }, [activeChannelId, isAuthenticated]);
 
   const fetchChannels = async () => {
   if (!activeServerId) return;
@@ -100,17 +181,13 @@ function App() {
 
   useEffect(() => {
     fetchChannels();
-  }, [activeServerId]);
+  }, [activeServerId, isAuthenticated]);
 
   const fetchMessages = async () => {
     if (!activeChannelId) return;
     const res = await api.get(`/api/channels/${activeChannelId}/messages/`);
     setMessages(res.data);
   };
-
-  const [hasSteamLinked, setHasSteamLinked] = useState(false);
-  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
-  const [suggestionsRefreshKey, setSuggestionsRefreshKey] = useState(0);
 
   useEffect(() => {
     const fetchSuggestions = async () => {
@@ -139,7 +216,9 @@ function App() {
           img: game.appid
             ? `https://cdn.akamai.steamstatic.com/steam/apps/${game.appid}/header.jpg`
             : logo,
+          genre: game.genre,
         }));
+        games.sort(() => Math.random() - 0.5);
         setSuggestedGames(games);
       } catch (error) {
         console.error('Failed to fetch game suggestions', error);
@@ -150,26 +229,52 @@ function App() {
     };
 
     fetchSuggestions();
-  }, [isAuthenticated, suggestionsRefreshKey]);
+  }, [isAuthenticated, suggestionsRefreshKey, isAuthenticated]);
 
   const handleSteamLinked = () => {
     setSuggestionsRefreshKey((prev) => prev + 1);
   };
 
+  useEffect(() => {
+     const fetchCurrentUser = async () => {
+      const me =  await api.get('/api/auth/me/');
+      setUser(me.data);
+     };
+     fetchCurrentUser();
+  }, [isAuthenticated])
+
+  useEffect(() => {
+    // Si l'utilisateur est connecté, alié Steam, et qu'il n'y a plus de jeu, on refresh
+    if (isAuthenticated && hasSteamLinked && suggestedGames.length === 0 && !isLoadingSuggestions) {
+       setSuggestionsRefreshKey((prev) => prev + 1);
+    }
+  }, [suggestedGames.length]);
+
   return (
     <Router>
         <Routes>
         <Route path="/login" element={<Login setAuth={setIsAuthenticated}/>} />
-          {/* Protected Routes */}
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={
               <div className="app-container">
                 <Sidebar friends={friends}
-                servers={servers} 
-                onServerCreated={loadServers} 
-                activeServerId={activeServerId} 
-                onSelectServer={setActiveServerId} />
-              
+                currentUser={user}
+                friendsStats={friendsStats}
+                userStats={userStats}/>
+                <GamesSidebar 
+                  suggestedGames={suggestedGames}
+                  setSuggestedGames={setSuggestedGames}
+                  hasSteamLinked={hasSteamLinked}
+                  isLoadingSuggestions={isLoadingSuggestions}
+                  onSelectGame={(id) => setActiveSteamGameId(id)}
+                  refreshStats={fetchStats} 
+                  refreshGamesList={fetchSuggestions} 
+                />
+
+                <SteamView 
+                  gameId={activeSteamGameId} 
+                  onClose={() => setActiveSteamGameId(null)} 
+                />
                 <main className="main-content">
                   <UserAccount setAuth={setIsAuthenticated} />
                   <ChatArea messages={messages}
@@ -182,9 +287,11 @@ function App() {
                   activeChannelId={activeChannelId} 
                   onSelectChannel={setActiveChannelId}
                   onChannelCreated={fetchChannels}
-                  suggestedGames={suggestedGames}
-                  hasSteamLinked={hasSteamLinked}
-                  isLoadingSuggestions={isLoadingSuggestions}
+                  servers={servers} 
+                  onServerCreated={loadServers} 
+                  onSelectServer={setActiveServerId} 
+                  currentUser={user}
+                  friends={friends}
                 />
               </div>
             } />
