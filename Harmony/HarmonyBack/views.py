@@ -547,10 +547,10 @@ class FriendsUserStatsView(APIView):
         try:
             radar_data_all = []
             for friend in request.user.friends.all():
-                prefs = create_user_pref_dict(friend.steam_id, csv_path)
-                
-                if not prefs:
-                    return Response([], status=200)
+                if not friend.profile.genre_vector:
+                    prefs = create_user_pref_dict(friend.steam_id, csv_path)
+                else:
+                    prefs = friend.profile.genre_vector
 
                 radar_data = []
                 for genre, score in list(prefs.items())[:6]:
