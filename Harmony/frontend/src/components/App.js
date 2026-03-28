@@ -280,7 +280,10 @@ function App() {
                   className={gamesOpen ? 'mobile-open' : ''}
                   setGamesOpen={setGamesOpen}
                 />
-
+                <SteamView 
+                  gameId={activeSteamGameId} 
+                  onClose={() => setActiveSteamGameId(null)} 
+                />
                 <main className="main-content">
                   {/* 2. This header should ONLY exist on mobile */}
                   <div className="mobile-nav-header">
