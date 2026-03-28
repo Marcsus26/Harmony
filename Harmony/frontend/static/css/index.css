@@ -1201,6 +1201,16 @@ body, html {
     font-size: 16px; /* Prevents iOS from zooming in on input focus */
   }
 
+  /* Make chat full screen on mobile */
+  .chat-wrapper {
+    width: 100%;
+    left: 0;
+    top: 60px;
+    margin: 0;
+    height: calc(100vh - 60px);
+    bottom: 0;
+  }
+
   /* Shrink the welcome text */
   .welcome {
     font-size: 1.5rem;
