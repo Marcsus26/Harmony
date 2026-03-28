@@ -1118,18 +1118,6 @@ body, html {
     border-bottom: 1px solid #3a2563;
   }
 
-  .mobile-close {
-    display: block;
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background: none;
-    border: none;
-    color: white;
-    font-size: 24px;
-    z-index: 10000;
-  }
-
   .menu-btn {
     display: block;
     position: absolute;
