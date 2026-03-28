@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import api from '../api.js';
 
 
-function RightSidebar({ channels, activeChannelId, onSelectChannel, onChannelCreated, servers, onServerCreated, activeServerId, onSelectServer, currentUser, friends }) {
+function RightSidebar({ channels, activeChannelId, onSelectChannel, onChannelCreated, servers, onServerCreated, activeServerId, onSelectServer, currentUser, friends, className, setRightOpen }) {
   const [showModal, setShowModal] = useState(false);
   const [newChannelName, setNewChannelName] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
@@ -132,7 +132,8 @@ function RightSidebar({ channels, activeChannelId, onSelectChannel, onChannelCre
   };
 
 return (
-        <div className="right-sidebar">
+        <div className={`right-sidebar ${className}`}>
+            <button className="mobile-close" onClick={() => setRightOpen(false)}>✕</button>
             <div className="panel channel-panel">
                 <p className="sidebar-label">SERVER CHANNELS</p>
                 {activeServerId && (

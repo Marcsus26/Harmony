@@ -1127,6 +1127,7 @@ body, html {
     border: none;
     color: white;
     font-size: 24px;
+    z-index: 10000;
   }
 
   /* SIDEBARS: Hide them off-screen by default */

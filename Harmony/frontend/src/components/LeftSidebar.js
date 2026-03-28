@@ -151,7 +151,7 @@ function AddFriendModal({ isOpen, onClose }) {
   );
 }
 
-function Sidebar({ friends, currentUser, userStats, friendsStats }) {
+function Sidebar({ friends, currentUser, userStats, friendsStats, className, setLeftOpen }) {
 // 1. On remplace les fausses données par un state vide
   const [suggestions, setSuggestions] = useState([]);
 
@@ -207,7 +207,7 @@ function Sidebar({ friends, currentUser, userStats, friendsStats }) {
   }
 
   return (
-    <div className="sidebar">
+    <div className={`sidebar ${className}`}>
       <button className="mobile-close" onClick={() => setLeftOpen(false)}>✕</button>
       <div className="top-sections">
         <div className="friends-section">
