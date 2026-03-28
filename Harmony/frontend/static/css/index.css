@@ -1173,7 +1173,7 @@ body, html {
     position: fixed;
     left: 0;
     top: 0;
-    width: 280px;
+    width: 320px;
     height: 100vh;
     z-index: 1000;
     background-color: #1e1b2e;
@@ -1208,7 +1208,12 @@ body, html {
     top: 60px;
     margin: 0;
     height: calc(100vh - 60px);
-    bottom: 0;
+    bottom: 10%;
+  }
+
+  /* Move user nav below header on mobile */
+  .user-nav {
+    top: 60px;
   }
 
   /* Shrink the welcome text */
