@@ -1130,6 +1130,18 @@ body, html {
     z-index: 10000;
   }
 
+  .menu-btn {
+    display: block;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    z-index: 10000;
+  }
+
   /* SIDEBARS: Hide them off-screen by default */
   .sidebar, .right-sidebar {
     position: fixed;

@@ -34,6 +34,7 @@ function App() {
   const [suggestionsRefreshKey, setSuggestionsRefreshKey] = useState(0);
   const [leftOpen, setLeftOpen] = useState(false);
   const [rightOpen, setRightOpen] = useState(false);
+  const [gamesOpen, setGamesOpen] = useState(false);
 
   const fetchStats = async () => {
     try {
@@ -276,6 +277,8 @@ function App() {
                   onSelectGame={(id) => setActiveSteamGameId(id)}
                   refreshStats={fetchStats} 
                   refreshGamesList={fetchSuggestions} 
+                  className={gamesOpen ? 'mobile-open' : ''}
+                  setGamesOpen={setGamesOpen}
                 />
 
                 <main className="main-content">
@@ -283,6 +286,7 @@ function App() {
                   <div className="mobile-nav-header">
                     <button className="menu-btn" onClick={() => setLeftOpen(true)}>☰</button>
                     <span className="mobile-logo">HARMONY</span>
+                    <button className="menu-btn" onClick={() => setGamesOpen(true)}>🎮</button>
                     <button className="menu-btn" onClick={() => setRightOpen(true)}>⚙️</button>
                   </div>
                   

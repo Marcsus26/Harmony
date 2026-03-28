@@ -2,7 +2,7 @@ import React from 'react';
 import '../../static/css/index.css';
 import api from '../api.js';
 
-function GamesSidebar({ suggestedGames, hasSteamLinked, isLoadingSuggestions, onSelectGame, setSuggestedGames, refreshStats, refreshGamesList }) {
+function GamesSidebar({ suggestedGames, hasSteamLinked, isLoadingSuggestions, onSelectGame, setSuggestedGames, refreshStats, refreshGamesList, className, setGamesOpen }) {
 
     const handleRefuse = async (e, gameId) => {
     e.stopPropagation();
@@ -29,7 +29,8 @@ function GamesSidebar({ suggestedGames, hasSteamLinked, isLoadingSuggestions, on
     }
   };
   return (
-    <div className="games-sidebar">
+    <div className={`games-sidebar ${className}`}>
+      <button className="mobile-close" onClick={() => setGamesOpen(false)}>✕</button>
       <div className="panel">
         <p className="sidebar-label">BASED ON THE GAMES YOU PLAY</p>
         
