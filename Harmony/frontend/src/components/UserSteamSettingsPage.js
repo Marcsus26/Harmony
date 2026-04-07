@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api';
-import '../../static/css/Profile.css'; // Reusing your profile styles
+import '../../static/css/Profile.css';
 import { useNavigate } from 'react-router-dom';
 
 function SteamIntegration({ onSteamLinked }) {

@@ -38,7 +38,7 @@ function App() {
 
   const fetchStats = async () => {
     try {
-      const response = await api.get('/api/recommendations/stats/'); // Ton endpoint Django
+      const response = await api.get('/api/recommendations/stats/');
       setUserStats(response.data);
     } catch (error) {
       console.error("Erreur stats:", error);
@@ -120,7 +120,7 @@ function App() {
   useEffect(() => {
       const fetchFriendsStats = async () => {
           try {
-              const response = await api.get('/api/recommendations/friends-stats/'); // Ton endpoint Django
+              const response = await api.get('/api/recommendations/friends-stats/');
               setFriendsStats(response.data);
           } catch (error) {
               console.error("Erreur stats:", error);

@@ -34,16 +34,13 @@ def get_game_genres(game_id):
     return []
 
 class CurrentUserView(APIView):
-    permission_classes = [IsAuthenticated] # Only logged-in users allowed
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        # request.user is automatically populated by the JWT token
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
     
     def patch(self, request):
-        # 'partial=True' allows you to update JUST the steam_id 
-        # without sending username/email every time.
         serializer = UserSerializer(request.user, data=request.data, partial=True)
         
         if serializer.is_valid():

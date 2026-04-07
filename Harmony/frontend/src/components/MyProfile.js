@@ -41,8 +41,6 @@ function MyProfile() {
   return (
     <div className="profile-page-container">
       <div className="profile-card">
-        
-        {/* NEW: Visual Header with Live Preview */}
         <div className="profile-header">
           <h2>My Profile</h2>
           <div className="avatar-preview-wrapper">

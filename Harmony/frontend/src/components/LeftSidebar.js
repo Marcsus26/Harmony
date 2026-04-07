@@ -152,7 +152,6 @@ function AddFriendModal({ isOpen, onClose }) {
 }
 
 function Sidebar({ friends, currentUser, userStats, friendsStats, className, setLeftOpen }) {
-// 1. On remplace les fausses données par un state vide
   const [suggestions, setSuggestions] = useState([]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -175,7 +174,6 @@ function Sidebar({ friends, currentUser, userStats, friendsStats, className, set
   const [isRequestsOpen, setIsRequestsOpen] = useState(false);
   const [requestCount, setRequestCount] = useState(0);
 
-  // 2. On crée un useEffect pour récupérer les suggestions au chargement
   useEffect(() => {
     const fetchSuggestions = async () => {
       try {
@@ -194,7 +192,6 @@ function Sidebar({ friends, currentUser, userStats, friendsStats, className, set
       setRequestCount(res.data.length);
   };
 
-  // Poll for request count every minute
   useEffect(() => {
     checkCount();
     const interval = setInterval(checkCount, 60000);
@@ -223,8 +220,6 @@ function Sidebar({ friends, currentUser, userStats, friendsStats, className, set
         <div className="suggestions-section">
           {suggestions.map(s => <SuggestedFriendItem key={s.id} {...s} />)}
         </div>
-
-        {/* NOUVELLE SECTION : Statistiques Hexagonales */}
             <div className="panel stats-panel">
                 <p className="sidebar-label">YOUR GAMING PROFILE</p>
                 <UserStatsChart stats={userStats} />
